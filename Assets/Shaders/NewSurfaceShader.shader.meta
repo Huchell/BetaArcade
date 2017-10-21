@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 6fa1931fe426d6e48a6696f70da157a3
+timeCreated: 1508538467
+licenseType: Pro
+ShaderImporter:
+  defaultTextures:
+  - _DefaultMaterial_Normal_DirectX: {fileID: 2800000, guid: 43787f61377ed5943bc27c7ea5afc87d,
+      type: 3}
+  - _DefaultMaterial_Base_Color: {fileID: 2800000, guid: de018293a49df8c4aa9de08c7a059d54,
+      type: 3}
+  - _DefaultMaterial_Metallic: {fileID: 2800000, guid: 0cce8cd5b3ace504faa78e1f5e556109,
+      type: 3}
+  - _DefaultMaterial_Roughness: {fileID: 2800000, guid: 82def9798cf81f74d924e704f6cd6fd2,
+      type: 3}
+  - _DefaultMaterial_Mixed_AO: {fileID: 2800000, guid: b2275343371243643a6c1f4cf62a8671,
+      type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
