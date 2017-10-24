@@ -54,7 +54,7 @@ Shader "NewSurfaceShader"
 		ENDCG
 	}
 	Fallback "Diffuse"
-	CustomEditor "ASEMaterialInspector"
+	//CustomEditor "ASEMaterialInspector"
 }
 /*ASEBEGIN
 Version=13101
