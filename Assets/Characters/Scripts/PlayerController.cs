@@ -15,12 +15,29 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody rb;
 	public LayerMask groundLayers;
+
+    private CapsuleCollider m_CapsuleCollider;
+
+    public bool isGrounded
+    {
+        get
+        {
+            if (Physics.Raycast(transform.position, Vector3.down, (m_CapsuleCollider.height / 2) + 0.1f, groundLayers.value))
+            {
+                JumpTwo = false;
+                return true;
+            }
+            else
+                return false;
+        }
+    }
 	void Start ()
 	{
 		rb = GetComponent<Rigidbody> ();
-	}
+        m_CapsuleCollider = GetComponent<CapsuleCollider>();
+    }
 
-	void OnCollisionEnter(Collision col)
+	/*void OnCollisionEnter(Collision col)
 	{
 		if (col.transform.tag == "Walkable") 
 		{
@@ -32,14 +49,14 @@ public class PlayerController : MonoBehaviour
 
         }
 
-	}
+	}*/
 
 	void FixedUpdate()
 	{
 		float x = Input.GetAxis("Horizontal") * Time.deltaTime * Speed;
 		float z = Input.GetAxis("Vertical") * Time.deltaTime * Speed;
 
-		transform.Translate(x, 0, z);
+        transform.Translate(x, 0, z);
 
         if (Input.GetButtonDown("Fire2"))
         {
@@ -70,11 +87,24 @@ public class PlayerController : MonoBehaviour
 
 	void Update ()
 	{
-		
+        Debug.Log(isGrounded);
 
 		if(Input.GetButtonDown("Jump"))
 		{
-			if (CanJump)
+            if (isGrounded)
+            {
+                Jump();
+            }
+            else
+            {
+                if (!JumpTwo)
+                {
+                    Jump();
+                    JumpTwo = true;
+                }
+            }
+
+			/*if (CanJump)
 			{
 				Jump ();
 				if (!JumpOne && !JumpTwo) {
@@ -85,7 +115,7 @@ public class PlayerController : MonoBehaviour
 					JumpOne = false;
 					CanJump = false;
 				}
-			}
+			}*/
 		}
 	}
 
