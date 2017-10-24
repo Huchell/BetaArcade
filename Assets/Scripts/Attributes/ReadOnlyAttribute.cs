@@ -8,6 +8,17 @@ using UnityEditor;
 
 public class ReadOnlyAttribute : PropertyAttribute {
 
+    public bool active;
+
+    public ReadOnlyAttribute()
+    {
+        active = true;
+    }
+
+    public ReadOnlyAttribute(bool active)
+    {
+        this.active = active;
+    }
 }
 
 #if UNITY_EDITOR
@@ -16,7 +27,9 @@ public class ReadOnlyDrawer : PropertyDrawer
 {
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        GUI.enabled = false;
+        ReadOnlyAttribute ro = attribute as ReadOnlyAttribute;
+
+        GUI.enabled = !ro.active;
 
         EditorGUI.PropertyField(position, property, label);
 
