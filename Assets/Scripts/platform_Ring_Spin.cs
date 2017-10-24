@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class platform_Ring_Spin : MonoBehaviour {
 
+	[Tooltip("Rotations per second. 0.1f means it will take 10 seconds for one full rotation.")]
 	public float RPS = 0.1f;
 	private MeshFilter mf;
 	//private Rigidbody rb;

@@ -5,20 +5,23 @@ using UnityEditor;
 
 public class platform_Ring_Update : MonoBehaviour {
 
+	[Tooltip("Number of platforms. Capped at 32 for stability; see Adam if this cap is insufficient. You must click 'Refresh Platforms' to make this change.")]
 	public int numberOfPlatforms;
 	private GameObject[] platforms;
+	[Tooltip("Radius of ring of platforms. You must click 'Refresh Platforms' to make this change.")]
 	public float radius = 5f;
+	[Tooltip("Prefab used for platform and ghosts. You must click 'Refresh Platforms' to make this change.")]
 	public GameObject platformType;
+	[Tooltip("Platform scale.")]
 	public Vector3 platformScale = new Vector3(1.0f,1.0f,1.0f);
+
+	private int platformCountCap = 32;
 
 	private bool update = true;
 
 	public void OnValidate()
 	{
-		if (numberOfPlatforms > 32)
-		{
-			numberOfPlatforms = 32;
-		}
+		numberOfPlatforms = Mathf.Clamp (numberOfPlatforms, 0, platformCountCap);
 
 		/*
 		if (Application.isPlaying)
@@ -89,6 +92,16 @@ public class platform_Ring_Update : MonoBehaviour {
 			gm.transform.parent = transform;
 
 			platforms [count] = gm;
+		}
+	}
+
+	public void AdjustPlatformScale()
+	{
+		if (platforms != null) {
+			foreach (GameObject gm in platforms)
+			{
+				gm.transform.localScale = platformScale;
+			}
 		}
 	}
 }

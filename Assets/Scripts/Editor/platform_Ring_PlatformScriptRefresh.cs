@@ -15,4 +15,10 @@ public class platform_Ring_PlatformScriptRefresh : Editor {
 			script.RefreshPlatforms ();
 		}
 	}
+
+	public void OnSceneGUI()
+	{
+		platform_Ring_Update script = (platform_Ring_Update)target;
+		script.AdjustPlatformScale ();
+	}
 }

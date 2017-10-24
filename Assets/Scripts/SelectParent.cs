@@ -1,16 +1,31 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 public class SelectParent : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+	/*GameObject selected;
+
+	public void OnSceneGUI()
+	{
+		selected = Selection.activeGameObject;
+		if (selected != null)
+		switch (selected.transform.parent.tag.ToString())
+		{
+			case ("PlatformRingCentre"):
+			{
+				Selection.activeGameObject = selected.transform.parent.gameObject;
+				Debug.Log ("FUCKER!");
+				selected = null;
+				break;
+			}
+		}
+	}*/
+
+	void Awake()
+	{
+		if (Application.isPlaying)
+			Destroy (this);
 	}
 }
