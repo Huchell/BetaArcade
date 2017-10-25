@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CustomEditor(typeof(ChoppingBoard))]
+//[CustomEditor(typeof(ChoppingBoard))]
 public class ChoppingBoardEditor : Editor {
 
     SerializedProperty
