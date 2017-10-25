@@ -1,7 +1,13 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: d2aa500333928e940a5f2b80b04224ac
 folderAsset: yes
 timeCreated: 1508593140
+=======
+guid: 62531e62026f25942ad9f469f2b8e1c0
+folderAsset: yes
+timeCreated: 1508841118
+>>>>>>> refs/remotes/origin/Adam-platforms
 licenseType: Pro
 DefaultImporter:
   userData: 
