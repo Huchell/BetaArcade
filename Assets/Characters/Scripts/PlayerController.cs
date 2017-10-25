@@ -57,15 +57,10 @@ public class PlayerController : MonoBehaviour
         float x = Input.GetAxisRaw("Horizontal") /* Time.deltaTime*/ * Speed;
         float z = Input.GetAxisRaw("Vertical") /* Time.deltaTime*/ * Speed;
 
-        Debug.LogFormat("X: {0}, Z: {1}", x, z);
+        //Debug.LogFormat("X: {0}, Z: {1}", x, z);
 
-<<<<<<< HEAD
         rb.velocity = new Vector3(x, rb.velocity.y, z);
         //transform.Translate(x, 0, z);
-=======
-        rb.velocity = new Vector3(x + rb.velocity.x, rb.velocity.y, z + rb.velocity.z);
-		//transform.Translate(x, 0, z);
->>>>>>> refs/remotes/origin/Adam-platforms
 
         if (Input.GetButtonDown("Fire3"))
         {
