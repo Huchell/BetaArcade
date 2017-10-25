@@ -39,7 +39,8 @@ public class PlayerController : MonoBehaviour
 		float x = Input.GetAxis("Horizontal") * Time.deltaTime * Speed;
 		float z = Input.GetAxis("Vertical") * Time.deltaTime * Speed;
 
-		transform.Translate(x, 0, z);
+        rb.velocity = new Vector3(x + rb.velocity.x, rb.velocity.y, z + rb.velocity.z);
+		//transform.Translate(x, 0, z);
 
         if (Input.GetButtonDown("Fire2"))
         {
