@@ -12,7 +12,7 @@ public class ChoppingBoard : MonoBehaviour {
 	}
 
     [Tooltip("The transform of the knife the chopping board will be using")]
-	[SerializeField] Transform m_KnifeTransform;
+	[SerializeField] Knife m_Knife;
 
     [Tooltip("The height off the board the knife sits at rest")]
 	[SerializeField] float m_KnifeYOffset;
@@ -38,6 +38,20 @@ public class ChoppingBoard : MonoBehaviour {
 
     [Tooltip("The Cooldown time for the knife before it starts tracking the player after a cut")]
     [SerializeField] float m_CooldownTime = 1.0f;
+
+    [SerializeField] bool m_RandomSway = false;
+
+    [SerializeField] AnimationCurve m_SwayCurve;
+    [ReadOnly] [SerializeField] float m_CurrentSwayTime;
+    int m_CurrentSwayDirection = 1;
+
+    float m_SwayCurveEndTime
+    {
+        get
+        {
+            return m_SwayCurve[m_SwayCurve.length - 1].time;
+        }
+    }
 
 	ChoppingState m_chopState = ChoppingState.Idle;
 	float m_currentShakeTime = 0.0f;
@@ -80,23 +94,20 @@ public class ChoppingBoard : MonoBehaviour {
 
     void TrackTarget() {
 
-		if (!m_KnifeTransform)
+		if (m_Knife == null)
 			return;
 
-
-		Vector3 thisPos = m_KnifeTransform.position;
+		Vector3 thisPos = m_Knife.transform.position;
 		Vector3 targetPos = m_Target.position;
+        thisPos.y = targetPos.y = m_KnifeYOffset;
 
-		Vector3 movePos = new Vector3(
-			Mathf.MoveTowards(thisPos.x, targetPos.x, Time.deltaTime * m_KnifeSpeed),
-			thisPos.y,
-			Mathf.MoveTowards(thisPos.z, targetPos.z, Time.deltaTime * m_KnifeSpeed)
-		);
+        Vector3 moveVector = Vector3.MoveTowards(thisPos, targetPos, Time.deltaTime * m_KnifeSpeed);
 
-		m_KnifeTransform.position = movePos;
+        m_Knife.MoveKnife(moveVector);
 	}
+
 	void CheckCutTarget() {
-		Vector3 thisPos = m_KnifeTransform.position;
+		Vector3 thisPos = m_Knife.transform.position;
 		Vector3 targetPos = m_Target.position;
 
 		if (NearlyEqual(thisPos.x, targetPos.x, m_KnifeDistanceTolerence) && NearlyEqual(thisPos.z, targetPos.z, m_KnifeDistanceTolerence)) {
@@ -119,33 +130,38 @@ public class ChoppingBoard : MonoBehaviour {
 	}
 	IEnumerator StartCutting() {
 
-		Vector3 startPos = m_KnifeTransform.position;
+        yield return m_Knife.StartCut();
+
+		Vector3 startPos = m_Knife.transform.position;
         float currentShakeTime = 0;
 
 		while (currentShakeTime < m_ShakeTime) {
 			Vector3 randomVector = Random.insideUnitSphere;
-			m_KnifeTransform.position = startPos + randomVector * m_ShakeAmplitude;
+			m_Knife.transform.position = startPos + randomVector * m_ShakeAmplitude;
 
 			currentShakeTime += Time.deltaTime;
 
 			yield return wait;
 		}
 
-        m_KnifeTransform.position = startPos;
+        m_Knife.transform.position = startPos;
 
+        
 		bool hasCut = false;
 		int direction = 1;
 		float cutAmount = 0;
-			
+
+        m_Knife.StartLeanKnife(0, .1f);
+
 		while (!hasCut)
 		{
             Debug.Log("Cut");
-			Vector3 knifePos = m_KnifeTransform.position;
+			Vector3 knifePos = m_Knife.transform.position;
 
 			cutAmount = Mathf.Clamp (cutAmount + (Time.deltaTime * m_CuttingSpeed * direction), 0, m_KnifeYOffset);
 			knifePos.y = m_KnifeYOffset - cutAmount;
 
-			m_KnifeTransform.position = knifePos;
+			m_Knife.transform.position = knifePos;
 
 			if (cutAmount == m_KnifeYOffset)
 				direction = -1;
@@ -157,7 +173,7 @@ public class ChoppingBoard : MonoBehaviour {
 
         yield return new WaitForSeconds(m_CooldownTime);
 
-        ChangeChoppingState(ChoppingState.Tracking);
+        ChangeChoppingState(ChoppingState.Idle);
 	}
 
 	#endregion
@@ -180,11 +196,11 @@ public class ChoppingBoard : MonoBehaviour {
 
 	void OnValidate() {
 
-        if (m_KnifeTransform)
+        if (m_Knife)
         {
-            Vector3 knifePos = m_KnifeTransform.position;
+            Vector3 knifePos = m_Knife.transform.position;
             knifePos.y = m_KnifeYOffset;
-            m_KnifeTransform.position = knifePos;
+            m_Knife.transform.position = knifePos;
         }
 	}
 
