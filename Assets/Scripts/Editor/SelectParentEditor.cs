@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class SelectParentEditor : Editor {
+[CustomEditor(typeof(SelectParent))]
+public class SelectParentEditor : Editor
+{
+	GameObject selected;
 
-	public override void OnInspectorGUI ()
+	public void OnSceneGUI()
 	{
-		DrawDefaultInspector ();
-
-		SelectParent p = (target as SelectParent);
-		if (Selection.activeGameObject == p.gameObject)
-			Selection.activeObject = p.transform.parent.gameObject;
+		selected = Selection.activeGameObject;
+		if (selected.transform.parent != null)
+		{
+			Selection.activeGameObject = selected.transform.parent.gameObject;
+			selected = null;
+		}
 	}
 }
