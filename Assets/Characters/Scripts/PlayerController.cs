@@ -124,15 +124,13 @@ public class PlayerController : MonoBehaviour
         // Get Components
 		rb = GetComponent<Rigidbody> ();
         m_CapsuleCollider = GetComponent<CapsuleCollider>();
-<<<<<<< HEAD
 
         Player1.GetComponent<PlayerController>().CanMove = true;
         Player2.GetComponent<PlayerController>().CanMove = false;
         Player1.GetComponent<PlayerController>().CanJump = true;
         Player2.GetComponent<PlayerController>().CanJump = false;
-=======
+
         transform.position = SaveBox.Load();
->>>>>>> d16a11f7313230fe671e72b1b1ef6de67ed3dcf2
     }
 
     void FixedUpdate()
@@ -165,17 +163,12 @@ public class PlayerController : MonoBehaviour
                 Player2.GetComponent<PlayerController>().CanJump = false;
             }
         }
-
-        if (Camera1On)
-        {
-            
-        }
-
-
         // If the player can move, move them
         if (CanMove)
+        {
             ApplyMovement();
 
+        }
         if (Input.GetButtonDown("Fire3"))
         {
             IsSprint = !IsSprint;
@@ -231,9 +224,6 @@ public class PlayerController : MonoBehaviour
         {
             JumpTwo = false;
         }*/
-<<<<<<< HEAD
-    }
-=======
 	}
 
     public void OnDamage(int dmg)
@@ -272,7 +262,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
->>>>>>> d16a11f7313230fe671e72b1b1ef6de67ed3dcf2
     #region Movement
     void ApplyMovement()
     {
