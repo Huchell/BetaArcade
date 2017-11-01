@@ -47,8 +47,9 @@ public class PlayerController : MonoBehaviour
         {
             if (transform.position != m_prevPosition)
             {
-                m_GroundRay = new Ray(transform.position + new Vector3(0, m_CapsuleCollider.height / 2, 0), Vector3.down);
+				m_GroundRay = new Ray(transform.position + m_CapsuleCollider.center, Vector3.down);
 
+				Debug.DrawRay (m_GroundRay.origin, m_GroundRay.direction, Color.white, m_CapsuleCollider.height / 2);
                 m_prevPosition = transform.position;
             }
 
@@ -92,7 +93,7 @@ public class PlayerController : MonoBehaviour
                 m_lastGroundCheckTime = Time.time;
 
                 // Perform the grounded raycast
-                m_isGrounded = (Physics.Raycast(GroundRay, out m_groundHit, (m_CapsuleCollider.height / 2) + 0.1f, groundLayers.value));
+                m_isGrounded = (Physics.Raycast(GroundRay, out m_groundHit, (m_CapsuleCollider.height / 2), groundLayers.value));
             }
 
             // If you are grounded, then reset the double jump
