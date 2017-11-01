@@ -6,7 +6,7 @@ using System.Collections;
 public class PlayerController : MonoBehaviour
 {
     #region Variables
-
+    public int health = 3;
     public bool CanMove = true;
     public float Speed = 7;
     public float JumpHeight = 5;
@@ -124,11 +124,15 @@ public class PlayerController : MonoBehaviour
         // Get Components
 		rb = GetComponent<Rigidbody> ();
         m_CapsuleCollider = GetComponent<CapsuleCollider>();
+<<<<<<< HEAD
 
         Player1.GetComponent<PlayerController>().CanMove = true;
         Player2.GetComponent<PlayerController>().CanMove = false;
         Player1.GetComponent<PlayerController>().CanJump = true;
         Player2.GetComponent<PlayerController>().CanJump = false;
+=======
+        transform.position = SaveBox.Load();
+>>>>>>> d16a11f7313230fe671e72b1b1ef6de67ed3dcf2
     }
 
     void FixedUpdate()
@@ -227,7 +231,48 @@ public class PlayerController : MonoBehaviour
         {
             JumpTwo = false;
         }*/
+<<<<<<< HEAD
     }
+=======
+	}
+
+    public void OnDamage(int dmg)
+    {
+        health -= dmg;
+        Debug.Log(health);
+        switch (health)
+        {
+            case 3:
+                {
+                    //LeftEarUp
+                    //RightEarUp
+                    break;
+                }
+
+            case 2:
+                {
+                    //LeftEarDown
+                    //RightEarUp
+                    break;
+                }
+
+
+            case 1:
+                {
+                    //LeftEarDown
+                    //RightEarDown
+                    break;
+                }
+                
+            case 0:
+                {
+                    //DeathSequence
+                    break;
+                }
+        }
+    }
+
+>>>>>>> d16a11f7313230fe671e72b1b1ef6de67ed3dcf2
     #region Movement
     void ApplyMovement()
     {
