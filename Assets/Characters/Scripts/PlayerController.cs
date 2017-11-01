@@ -18,6 +18,13 @@ public class PlayerController : MonoBehaviour
     public bool Charging = false;
     public LayerMask groundLayers;
     public float RotationSpeed;
+    public Camera Camera1;
+    public Camera Camera2;
+    public GameObject Player1;
+    public GameObject Player2;
+    public bool Camera1On = true;
+    public bool Camera2On = false;
+    public bool CanJump = true;
 
     #region Component References
     private Rigidbody rb;
@@ -117,10 +124,50 @@ public class PlayerController : MonoBehaviour
         // Get Components
 		rb = GetComponent<Rigidbody> ();
         m_CapsuleCollider = GetComponent<CapsuleCollider>();
+
+        Player1.GetComponent<PlayerController>().CanMove = true;
+        Player2.GetComponent<PlayerController>().CanMove = false;
+        Player1.GetComponent<PlayerController>().CanJump = true;
+        Player2.GetComponent<PlayerController>().CanJump = false;
     }
 
-	void FixedUpdate()
+    void FixedUpdate()
 	{
+        if (Camera1On)
+        {
+            if (Input.GetKeyUp(KeyCode.P))
+            {
+                Camera1.enabled = false;
+                Camera1On = false;
+                Camera2.enabled = true;
+                Camera2On = true;
+                Player2.GetComponent<PlayerController>().CanMove = true;
+                Player1.GetComponent<PlayerController>().CanMove = false;
+                Player2.GetComponent<PlayerController>().CanJump = true;
+                Player1.GetComponent<PlayerController>().CanJump = false;
+            }
+        }
+        else
+        {
+            if (Input.GetKeyUp(KeyCode.P))
+            {
+                Camera1.enabled = true;
+                Camera1On = true;
+                Camera2.enabled = false;
+                Camera2On = false;
+                Player1.GetComponent<PlayerController>().CanMove = true;
+                Player2.GetComponent<PlayerController>().CanMove = false;
+                Player1.GetComponent<PlayerController>().CanJump = true;
+                Player2.GetComponent<PlayerController>().CanJump = false;
+            }
+        }
+
+        if (Camera1On)
+        {
+            
+        }
+
+
         // If the player can move, move them
         if (CanMove)
             ApplyMovement();
@@ -151,15 +198,12 @@ public class PlayerController : MonoBehaviour
 
         // Apply Gravity
         ApplyDownForce();
-    }
 
-    void Update()
-    {
         float MouseDeltaX = (Input.GetAxis("CameraLookX"));
 
-        if(MouseDeltaX != 0)
+        if (MouseDeltaX != 0)
         {
-            transform.Rotate(0, MouseDeltaX * Time.deltaTime*RotationSpeed, 0);
+            transform.Rotate(0, MouseDeltaX * Time.deltaTime * RotationSpeed, 0);
         }
 
         // Handle Jumping Logic
@@ -183,12 +227,12 @@ public class PlayerController : MonoBehaviour
         {
             JumpTwo = false;
         }*/
-	}
-
+    }
     #region Movement
     void ApplyMovement()
     {
         float x = Input.GetAxisRaw("Horizontal") * Speed * Time.deltaTime;
+
         float z = Input.GetAxisRaw("Vertical") * Speed * Time.deltaTime;
 
         transform.Translate(x, 0, z);
@@ -200,16 +244,19 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     void JumpButtonDown()
     {
-        if (Input.GetButtonDown("Jump"))
+        if (CanJump)
         {
-            if (JumpStrength >= 20)
+            if (Input.GetButtonDown("Jump"))
             {
-                JumpTwo = true;
-            }
-            JumpStrength = 0;
+                if (JumpStrength >= 20)
+                {
+                    JumpTwo = true;
+                }
+                JumpStrength = 0;
 
-            if (isGrounded)
-                Charging = true;
+                if (isGrounded)
+                    Charging = true;
+            }
         }
     }
     /// <summary>
@@ -217,26 +264,29 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     void JumpButtonUp()
     {
-        if (Input.GetButtonUp("Jump"))
+        if (CanJump)
         {
-            if (JumpStrength < 20)
+            if (Input.GetButtonUp("Jump"))
             {
-                if (isGrounded)
+                if (JumpStrength < 20)
                 {
-                    Jump();
-                    JumpTwo = false;
+                    if (isGrounded)
+                    {
+                        Jump();
+                        JumpTwo = false;
+                    }
+                    else if (!JumpTwo)
+                    {
+                        Jump();
+                        JumpTwo = true;
+                    }
                 }
-                else if (!JumpTwo)
+                if (JumpStrength >= 20)
                 {
-                    Jump();
-                    JumpTwo = true;
+                    ChargeJump(JumpStrength);
                 }
+                Charging = false;
             }
-            if (JumpStrength >= 20)
-            {
-                ChargeJump(JumpStrength);
-            }
-            Charging = false;
         }
     }
 
