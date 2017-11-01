@@ -1,24 +1,43 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using System.Collections;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Rigidbody), typeof(CapsuleCollider))]
 public class PlayerController : MonoBehaviour
 {
-	public float Speed = 7;
-	public float JumpHeight = 5;
+    #region Variables
+
+    public bool CanMove = true;
+    public float Speed = 7;
+    public float JumpHeight = 5;
     public float GravityMultiplier = 2;
     public float energy = 1500.0f;
-	public bool JumpTwo = false;
-    public float Strength = 0;
+    public bool JumpTwo = false;
+    public float JumpStrength = 0;
     private bool IsSprint = false;
     public bool Charging = false;
+    public LayerMask groundLayers;
+    public float RotationSpeed;
 
+    #region Component References
     private Rigidbody rb;
-	public LayerMask groundLayers;
-
     private CapsuleCollider m_CapsuleCollider;
+    #endregion
 
-    [ReadOnly][SerializeField]private float m_lastGroundCheckTime;
+    #endregion
+
+    #region Is Grounded Property
+
+    #region GroundedEvent
+
+    [System.Serializable]
+    public class PlayerGroundedEvent : UnityEvent<RaycastHit> { }
+
+    public PlayerGroundedEvent OnGrounded;
+
+    #endregion
+
+    #region Ray
 
     private Vector3 m_prevPosition;
     private Ray m_GroundRay;
@@ -27,12 +46,20 @@ public class PlayerController : MonoBehaviour
         get
         {
             if (transform.position != m_prevPosition)
-                m_GroundRay = new Ray(transform.position, Vector3.down);
+            {
+				m_GroundRay = new Ray(transform.position + m_CapsuleCollider.center, Vector3.down);
+
+				Debug.DrawRay (m_GroundRay.origin, m_GroundRay.direction, Color.white, m_CapsuleCollider.height / 2);
+                m_prevPosition = transform.position;
+            }
 
             return m_GroundRay;
         }
     }
 
+    #endregion
+
+    #region RaycastHit
     private RaycastHit m_groundHit;
     public RaycastHit GroundHitInfo
     {
@@ -41,6 +68,11 @@ public class PlayerController : MonoBehaviour
             return m_groundHit;
         }
     }
+    #endregion
+
+    #region The Actual Raycast
+    private bool m_groundedLastFrame;
+    [ReadOnly] [SerializeField] private float m_lastGroundCheckTime;
 
     /// <summary>
     /// Used to cache the isGrounded check
@@ -61,41 +93,45 @@ public class PlayerController : MonoBehaviour
                 m_lastGroundCheckTime = Time.time;
 
                 // Perform the grounded raycast
-                m_isGrounded = (Physics.Raycast(GroundRay, out m_groundHit, (m_CapsuleCollider.height / 2) + 0.1f, groundLayers.value));
+                m_isGrounded = (Physics.Raycast(GroundRay, out m_groundHit, (m_CapsuleCollider.height / 2), groundLayers.value));
             }
 
             // If you are grounded, then reset the double jump
-            if (m_isGrounded)
+            if (!m_groundedLastFrame && m_isGrounded)
             {
                 JumpTwo = false;
+                rb.velocity = Vector3.zero;
             }
+
+            m_groundedLastFrame = m_isGrounded;
 
             // return the is grounded boolean
             return m_isGrounded;
         }
     }
+    #endregion
 
-	void Start ()
+    #endregion
+
+    void Start ()
 	{
+        // Get Components
 		rb = GetComponent<Rigidbody> ();
         m_CapsuleCollider = GetComponent<CapsuleCollider>();
     }
 
 	void FixedUpdate()
 	{
-		float x = Input.GetAxis("Horizontal") * Speed;
-		float z = Input.GetAxis("Vertical") * Speed;
+        // If the player can move, move them
+        if (CanMove)
+            ApplyMovement();
 
-        rb.velocity = new Vector3(x, rb.velocity.y, z);
-
-        /*
-         * TODO: Change hard coded values into variables
-         */
         if (Input.GetButtonDown("Fire3"))
         {
             IsSprint = !IsSprint;
         }
-        if (IsSprint == true && energy >= 0f)
+
+        if (IsSprint && energy >= 0f)
         {
             Speed = 14;
 
@@ -113,62 +149,134 @@ public class PlayerController : MonoBehaviour
                 IsSprint = false;
             }
         }
+
+        // Apply Gravity
+        ApplyDownForce();
     }
+
     void Update()
     {
+        float MouseDeltaX = (Input.GetAxis("CameraLookX"));
 
-        /*
-         * TODO: Change hard coded values into variables 
-         */
-        if (Input.GetButtonDown("Jump"))
+        if(MouseDeltaX != 0)
         {
-            if (Strength >= 60)
-            {
-                JumpTwo = true;
-            }
-            Strength = 0;
-            Charging = !Charging;
+            transform.Rotate(0, MouseDeltaX * Time.deltaTime*RotationSpeed, 0);
         }
 
-        if (Input.GetButtonUp("Jump"))
-        {
-            if (Strength < 60)
-            {
-                if (isGrounded)
-                {
-                    Jump();
-                }
-                else if (!JumpTwo)
-                    {
-                        Jump();
-                        JumpTwo = true;
-                    }
-            }
-            if (Strength >= 60)
-            {
-                ChargeJump(Strength);
-            }
-            Charging = false;
-        }
+        // Handle Jumping Logic
+        JumpButtonDown();
+        JumpButtonUp();
 
         // Increase the charging value or sets it to 0
         if (Charging)
         {
-            Strength = Strength + 1;
-        }
-        else
-        {
-           //Strength = 0;
+            JumpStrength = JumpStrength + 1;
         }
 
         //stops the player charging a jump in the air
-        if (Charging && !isGrounded)
+        /*if (Charging && !isGrounded)
         {
             Charging = false;
+        }*/
+
+        // Taken out and placed in the Input.GetButtonUp if statement above
+        /*if (isGrounded)
+        {
+            JumpTwo = false;
+        }*/
+	}
+
+    #region Movement
+    void ApplyMovement()
+    {
+        float x = Input.GetAxisRaw("Horizontal") * Speed * Time.deltaTime;
+        float z = Input.GetAxisRaw("Vertical") * Speed * Time.deltaTime;
+
+        transform.Translate(x, 0, z);
+    }
+    #region Jump Methods
+
+    /// <summary>
+    /// Logic that handles the Jump Button Down
+    /// </summary>
+    void JumpButtonDown()
+    {
+        if (Input.GetButtonDown("Jump"))
+        {
+            if (JumpStrength >= 20)
+            {
+                JumpTwo = true;
+            }
+            JumpStrength = 0;
+
+            if (isGrounded)
+                Charging = true;
+        }
+    }
+    /// <summary>
+    /// Logic that handles the Jump Button Up
+    /// </summary>
+    void JumpButtonUp()
+    {
+        if (Input.GetButtonUp("Jump"))
+        {
+            if (JumpStrength < 20)
+            {
+                if (isGrounded)
+                {
+                    Jump();
+                    JumpTwo = false;
+                }
+                else if (!JumpTwo)
+                {
+                    Jump();
+                    JumpTwo = true;
+                }
+            }
+            if (JumpStrength >= 20)
+            {
+                ChargeJump(JumpStrength);
+            }
+            Charging = false;
+        }
+    }
+
+    private void Jump()
+    {
+        Jump(JumpHeight);
+    }
+    private void Jump(float strength)
+    {
+        // Reset the Y velocity of the player for the jump
+        // needed for the double jump
+        Vector3 velo = rb.velocity;
+        velo.y = 0;
+        rb.velocity = velo;
+
+        rb.AddForce(Vector3.up * strength, ForceMode.Impulse);
+    }
+
+    private void ChargeJump(float strength)
+    {
+        if (strength < 60)
+        {
+            if (strength >= 20 && strength < 59)
+            {
+                strength = JumpHeight * 1.4f;
+            }
+            else
+            {
+                strength = JumpHeight;
+            }
+        }
+        else if (strength >= 60)
+        {
+            strength = JumpHeight * 1.7f;
         }
 
-        ApplyDownForce();
-	}
+        Jump(strength);
+    }
+    #endregion
 
     private void ApplyDownForce()
     {
@@ -177,28 +285,5 @@ public class PlayerController : MonoBehaviour
             rb.AddForce((Physics.gravity * GravityMultiplier) - Physics.gravity);
         }
     }
-
-	private void Jump()
-	{
-        Vector3 velo = rb.velocity;
-        velo.y = 0;
-        rb.velocity = velo;
-        rb.AddForce(Vector3.up * JumpHeight, ForceMode.Impulse);
-	}
-
-    private void ChargeJump(float strength)
-    {
-        Vector3 velo = rb.velocity;
-        velo.y = 0;
-        rb.velocity = velo;
-        if (strength < 60)
-        {
-            strength = JumpHeight;
-        }
-        else if(strength >= 60)
-        {
-            strength = JumpHeight*1.7f;
-        }
-        rb.AddForce(Vector3.up * strength, ForceMode.Impulse);
-    }
+    #endregion
 }
