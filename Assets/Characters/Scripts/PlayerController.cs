@@ -18,17 +18,52 @@ public class PlayerController : MonoBehaviour
     public bool Charging = false;
     public LayerMask groundLayers;
     public float RotationSpeed;
-    public Camera Camera1;
+    /*public Camera Camera1;
     public Camera Camera2;
     public GameObject Player1;
     public GameObject Player2;
     public bool Camera1On = true;
-    public bool Camera2On = false;
+    public bool Camera2On = false;*/
     public bool CanJump = true;
+
+    [SerializeField]
+    private int m_playerNumber = -1;
+
+    public int playerNumber
+    {
+        get
+        {
+            return m_playerNumber;
+        }
+        set
+        {
+            m_playerNumber = value;
+            if (m_playerNumber < 0)
+            {
+                CanMove = false;
+                CanJump = false;
+                camera.gameObject.SetActive(false);
+            }
+            else
+            {
+                CanMove = true;
+                CanJump = true;
+                camera.gameObject.SetActive(true);
+                camera.targetDisplay = m_playerNumber;
+            }
+        }
+    }
+
+    [Range(0, 179)]
+    [SerializeField] float maxPitch = 30;
+    [Range(-179, 0)]
+    [SerializeField] float minPitch = -30;
 
     #region Component References
     private Rigidbody rb;
     private CapsuleCollider m_CapsuleCollider;
+    new private Camera camera;
+    private Transform cameraArm;
     #endregion
 
     #endregion
@@ -125,18 +160,34 @@ public class PlayerController : MonoBehaviour
         // Get Components
 		rb = GetComponent<Rigidbody> ();
         m_CapsuleCollider = GetComponent<CapsuleCollider>();
+        cameraArm = transform.Find("CameraArm");
+        camera = cameraArm.GetComponentInChildren<Camera>();
 
-        Player1.GetComponent<PlayerController>().CanMove = true;
+        if (playerNumber < 0)
+        {
+            CanMove = false;
+            CanJump = false;
+            camera.gameObject.SetActive(false);
+        }
+        else
+        {
+            CanMove = true;
+            CanJump = true;
+            camera.gameObject.SetActive(true);
+            camera.targetDisplay = m_playerNumber;
+        }
+
+        /*Player1.GetComponent<PlayerController>().CanMove = true;
         Player2.GetComponent<PlayerController>().CanMove = false;
         Player1.GetComponent<PlayerController>().CanJump = true;
-        Player2.GetComponent<PlayerController>().CanJump = false;
+        Player2.GetComponent<PlayerController>().CanJump = false;*/
 
-        transform.position = SaveBox.Load();
+        //transform.position = SaveBox.Load();
     }
 
     void FixedUpdate()
 	{
-        if (Camera1On)
+        /*if (Camera1On)
         {
             if (Input.GetKeyUp(KeyCode.P))
             {
@@ -163,50 +214,82 @@ public class PlayerController : MonoBehaviour
                 Player1.GetComponent<PlayerController>().CanJump = true;
                 Player2.GetComponent<PlayerController>().CanJump = false;
             }
-        }
+        }*/
+
         // If the player can move, move them
         if (CanMove)
         {
             ApplyMovement();
 
-        }
-        if (Input.GetButtonDown("Fire3"))
-        {
-            IsSprint = !IsSprint;
-        }
+            // Horizontal camera Rotation
+            float MouseDeltaX = Input.GetAxis(GetInputStringFromPlayer("Mouse X"));
 
-        if (IsSprint && energy >= 0f)
-        {
-            Speed = 14;
-
-            if(isGrounded)
+            if (MouseDeltaX != 0)
             {
-                energy = energy - 10;
+                Quaternion rotationDelta = transform.rotation;
+                Vector3 eulerRotationDelta = rotationDelta.eulerAngles;
+
+                eulerRotationDelta.y += MouseDeltaX * Time.deltaTime * RotationSpeed;
+
+                rotationDelta.eulerAngles = eulerRotationDelta;
+                transform.rotation = rotationDelta;
+            }
+
+            // Vertical Camera Rotation
+            float MouseDeltaY = Input.GetAxis(GetInputStringFromPlayer("Mouse Y"));
+
+            if (MouseDeltaY != 0)
+            {
+                Quaternion rotationDelta = cameraArm.transform.rotation;
+                Vector3 eulerRotationDelta = rotationDelta.eulerAngles;
+
+                float newx = eulerRotationDelta.x + MouseDeltaY * Time.deltaTime * RotationSpeed * -1;
+
+                if (newx < 180)
+                    newx = Mathf.Min(newx, Mathf.Repeat(maxPitch, 360));
+                else
+                    newx = Mathf.Max(newx, Mathf.Repeat(minPitch, 360));
+
+                eulerRotationDelta.x = newx;
+
+                rotationDelta.eulerAngles = eulerRotationDelta;
+                cameraArm.transform.rotation = rotationDelta;
+            }
+
+            if (Input.GetButtonDown(GetInputStringFromPlayer("Fire3")))
+            {
+                IsSprint = !IsSprint;
+            }
+
+            if (IsSprint && energy >= 0f)
+            {
+                Speed = 14;
+
+                if (isGrounded)
+                {
+                    energy = energy - 10;
+                }
+            }
+            else if (energy < 1500)
+            {
+                Speed = 7;
+                energy = energy + 5;
+                if (energy == 0)
+                {
+                    IsSprint = false;
+                }
             }
         }
-        else if (energy < 1500)
+
+        if (CanJump)
         {
-            Speed = 7;
-            energy = energy + 5;
-            if (energy == 0)
-            {
-                IsSprint = false;
-            }
+            // Handle Jumping Logic
+            JumpButtonDown();
+            JumpButtonUp();
         }
 
         // Apply Gravity
         ApplyDownForce();
-
-        float MouseDeltaX = (Input.GetAxis("CameraLookX"));
-
-        if (MouseDeltaX != 0)
-        {
-            transform.Rotate(0, MouseDeltaX * Time.deltaTime * RotationSpeed, 0);
-        }
-
-        // Handle Jumping Logic
-        JumpButtonDown();
-        JumpButtonUp();
 
         // Increase the charging value or sets it to 0
         if (Charging)
@@ -266,12 +349,13 @@ public class PlayerController : MonoBehaviour
     #region Movement
     void ApplyMovement()
     {
-        float x = Input.GetAxisRaw("Horizontal") * Speed * Time.deltaTime;
+        float x = Input.GetAxisRaw(GetInputStringFromPlayer("Horizontal")) * Speed * Time.deltaTime;
 
-        float z = Input.GetAxisRaw("Vertical") * Speed * Time.deltaTime;
+        float z = Input.GetAxisRaw(GetInputStringFromPlayer("Vertical")) * Speed * Time.deltaTime;
 
         transform.Translate(x, 0, z);
     }
+
     #region Jump Methods
 
     /// <summary>
@@ -279,19 +363,16 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     void JumpButtonDown()
     {
-        if (CanJump)
+        if (Input.GetButtonDown(GetInputStringFromPlayer("Jump")))
         {
-            if (Input.GetButtonDown("Jump"))
+            if (JumpStrength >= 20)
             {
-                if (JumpStrength >= 20)
-                {
-                    JumpTwo = true;
-                }
-                JumpStrength = 0;
-
-                if (isGrounded)
-                    Charging = true;
+                JumpTwo = true;
             }
+            JumpStrength = 0;
+
+            if (isGrounded)
+                Charging = true;
         }
     }
     /// <summary>
@@ -299,29 +380,26 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     void JumpButtonUp()
     {
-        if (CanJump)
+        if (Input.GetButtonUp(GetInputStringFromPlayer("Jump")))
         {
-            if (Input.GetButtonUp("Jump"))
+            if (JumpStrength < 20)
             {
-                if (JumpStrength < 20)
+                if (isGrounded)
                 {
-                    if (isGrounded)
-                    {
-                        Jump();
-                        JumpTwo = false;
-                    }
-                    else if (!JumpTwo)
-                    {
-                        Jump();
-                        JumpTwo = true;
-                    }
+                    Jump();
+                    JumpTwo = false;
                 }
-                if (JumpStrength >= 20)
+                else if (!JumpTwo)
                 {
-                    ChargeJump(JumpStrength);
+                    Jump();
+                    JumpTwo = true;
                 }
-                Charging = false;
             }
+            if (JumpStrength >= 20)
+            {
+                ChargeJump(JumpStrength);
+            }
+            Charging = false;
         }
     }
 
@@ -370,4 +448,9 @@ public class PlayerController : MonoBehaviour
         }
     }
     #endregion
+
+    private string GetInputStringFromPlayer(string startString)
+    {
+        return startString + "_" + playerNumber.ToString();
+    }
 }
