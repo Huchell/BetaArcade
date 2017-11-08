@@ -7,7 +7,7 @@ public class FlingPlayerTo : MonoBehaviour {
     Vector2 xzDirection, xzVelocity; float xzDistance, yDistance, yVelocity, flightTime = 1.5f, gravity = -9.81f;
     Vector3 finalForce;
 
-    public GameObject target;
+    public GameObject target;    
 
     private void OnCollisionEnter(Collision player)
     {
@@ -25,6 +25,7 @@ public class FlingPlayerTo : MonoBehaviour {
             finalForce = new Vector3(xzVelocity.x, yVelocity, xzVelocity.y);
 
             rb.AddForce(finalForce, ForceMode.VelocityChange);
+            Debug.Log(finalForce);
         }
     }
 
