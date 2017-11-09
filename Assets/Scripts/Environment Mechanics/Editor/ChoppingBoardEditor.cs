@@ -28,7 +28,7 @@ public class ChoppingBoardEditor : Editor {
         if (!knifeHolder)
         {
             GameObject gm = new GameObject("knifeHolder");
-            gm.transform.SetParent(cp_target.transform);
+            gm.transform.SetParent(cp_target.transform, false);
         }
     }
 
@@ -53,12 +53,12 @@ public class ChoppingBoardEditor : Editor {
             {
                 newKnifeObject = new GameObject("Knife_" + (sp_Knives.arraySize - 1));
                 new GameObject("Mesh", typeof(MeshFilter), typeof(MeshRenderer)).transform.SetParent(newKnifeObject.transform);
-                newKnifeObject.transform.SetParent(knifeHolder);
+                newKnifeObject.transform.SetParent(knifeHolder, false);
             }
             else
             {
                 newKnifeObject = Instantiate(sp_KnifeObjectPrefab.objectReferenceValue) as GameObject;
-                newKnifeObject.transform.SetParent(knifeHolder);
+                newKnifeObject.transform.SetParent(knifeHolder, false);
             }
 
             newKnife.FindPropertyRelative("knifeRoot").objectReferenceValue = newKnifeObject;

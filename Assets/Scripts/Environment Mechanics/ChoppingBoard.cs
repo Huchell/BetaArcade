@@ -32,7 +32,7 @@ public class ChoppingBoard : MonoBehaviour {
 
             while (isCutting)
             {
-                time += Time.deltaTime;
+                time += Time.deltaTime * speed;
                 Vector3 curPos = knifeRoot.localPosition;
                 curPos.y = path.Evaluate(time);
                 knifeRoot.localPosition = curPos;
