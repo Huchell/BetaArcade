@@ -3,103 +3,238 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-//[CustomEditor(typeof(ChoppingBoard))]
+[CustomEditor(typeof(ChoppingBoard))]
 public class ChoppingBoardEditor : Editor {
 
     SerializedProperty
-        sp_KnifeTransform,
-        sp_KnifeYOffset,
-        sp_KnifeSpeed,
-        sp_KnifeDistanceTolerence,
-        sp_ShakeTime,
-        sp_ShakeAmplitude,
-        sp_CuttingSpeed,
-        sp_Cooldown,
-        sp_Target;
+        sp_Knives,
+        sp_DefaultKnife,
+        sp_KnifeObjectPrefab;
 
-    private readonly GUIContent knifeContent = new GUIContent("Knife");
-    private readonly GUIContent shakeTitleContent = new GUIContent("Shake");
+    bool showSettings;
+    Transform knifeHolder;
+    ChoppingBoard cp_target;
 
     private void OnEnable()
     {
-        sp_KnifeTransform = GetProperty("m_KnifeTransform");
-        sp_KnifeYOffset = GetProperty("m_KnifeYOffset");
-        sp_KnifeSpeed = GetProperty("m_KnifeSpeed");
-        sp_KnifeDistanceTolerence = GetProperty("m_KnifeDistanceTolerence");
-        sp_ShakeTime = GetProperty("m_ShakeTime");
-        sp_ShakeAmplitude = GetProperty("m_ShakeAmplitude");
-        sp_CuttingSpeed = GetProperty("m_CuttingSpeed");
-        sp_Cooldown = GetProperty("m_CooldownTime");
-        sp_Target = GetProperty("m_Target");
-    }
-    SerializedProperty GetProperty(string property)
-    {
-        SerializedProperty prop = null;
+        sp_Knives = serializedObject.FindProperty("knives");
+        sp_DefaultKnife = serializedObject.FindProperty("defaultKnife");
+        sp_KnifeObjectPrefab = serializedObject.FindProperty("knifeObjectPrefab");
 
-        try
-        {
-            prop = serializedObject.FindProperty(property);
-        }
-        catch
-        {
-            Debug.LogError("Serialized Object doesn't have a property of: " + property);
-        }
+        cp_target = target as ChoppingBoard;
 
-        return prop;
+        knifeHolder = cp_target.transform.Find("knifeHolder");
+
+        if (!knifeHolder)
+        {
+            GameObject gm = new GameObject("knifeHolder");
+            gm.transform.SetParent(cp_target.transform);
+        }
     }
 
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
 
-        // Knife Group
-        KnifeGroup();
+        #region Top Bar
+        EditorGUILayout.BeginHorizontal();
 
-        // Shake group
-        ShakeGroup();
+        EditorGUILayout.LabelField(sp_Knives.displayName);
 
-        // Cutting speed
-        EditorGUILayout.PropertyField(sp_CuttingSpeed);
-        EditorGUILayout.PropertyField(sp_Cooldown);
+        EditorGUILayout.BeginHorizontal(GUILayout.Width(EditorGUIUtility.currentViewWidth / 6));
 
-        // Debug
-        DebugGroup();
+        if (GUILayout.Button(new GUIContent("+")))
+        {
+            sp_Knives.arraySize++;
+            SerializedProperty newKnife = sp_Knives.GetArrayElementAtIndex(sp_Knives.arraySize - 1);
+            GameObject newKnifeObject;
+
+            if (sp_KnifeObjectPrefab.objectReferenceValue == null)
+            {
+                newKnifeObject = new GameObject("Knife_" + (sp_Knives.arraySize - 1));
+                new GameObject("Mesh", typeof(MeshFilter), typeof(MeshRenderer)).transform.SetParent(newKnifeObject.transform);
+                newKnifeObject.transform.SetParent(knifeHolder);
+            }
+            else
+            {
+                newKnifeObject = Instantiate(sp_KnifeObjectPrefab.objectReferenceValue) as GameObject;
+                newKnifeObject.transform.SetParent(knifeHolder);
+            }
+
+            newKnife.FindPropertyRelative("knifeRoot").objectReferenceValue = newKnifeObject;
+            newKnife.FindPropertyRelative("path").animationCurveValue = sp_DefaultKnife.FindPropertyRelative("path").animationCurveValue;
+            newKnife.FindPropertyRelative("speed").floatValue = sp_DefaultKnife.FindPropertyRelative("speed").floatValue;
+            newKnife.FindPropertyRelative("move").boolValue = sp_DefaultKnife.FindPropertyRelative("move").boolValue;
+            newKnife.FindPropertyRelative("delay").floatValue = sp_DefaultKnife.FindPropertyRelative("delay").floatValue;
+        }
+
+        GUI.enabled = sp_Knives.arraySize > 0;
+
+        if (GUILayout.Button(new GUIContent("-")))
+        {
+            sp_Knives.DeleteArrayElementAtIndex(sp_Knives.arraySize - 1);
+        }
+
+        GUI.enabled = true;
+
+        EditorGUILayout.EndHorizontal();
+        EditorGUILayout.EndHorizontal();
+
+        #endregion
+
+        #region Knives Array
+        for (int i = 0; i < sp_Knives.arraySize; i++)
+        {
+            SerializedProperty prop = sp_Knives.GetArrayElementAtIndex(i);
+
+            EditorGUILayout.BeginHorizontal();
+
+            prop.isExpanded = EditorGUILayout.Foldout(prop.isExpanded, new GUIContent("Knife " + i));
+
+            EditorGUILayout.BeginHorizontal(GUILayout.Width(EditorGUIUtility.currentViewWidth / 6));
+
+            EditorGUI.BeginDisabledGroup(!Application.isPlaying);
+
+            if (GUILayout.Button("Chop"))
+            {
+                cp_target.ChopKnife(i);
+            }
+
+            EditorGUI.EndDisabledGroup();
+
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndHorizontal();
+
+            if (prop.isExpanded)
+            {
+                EditorGUI.indentLevel++;
+
+                SerializedProperty prop_knifeRoot = prop.FindPropertyRelative("knifeRoot");
+                SerializedProperty prop_Path = prop.FindPropertyRelative("path");
+                SerializedProperty prop_Speed = prop.FindPropertyRelative("speed");
+                SerializedProperty prop_delay = prop.FindPropertyRelative("delay");
+                SerializedProperty prop_Move = prop.FindPropertyRelative("move");
+
+                #region Root
+
+                EditorGUI.BeginChangeCheck();
+
+                Object knifeRoot = EditorGUILayout.ObjectField("Root", prop_knifeRoot.objectReferenceValue, typeof(Transform), true);
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    if (!SerializedArrayContains(sp_Knives, "knifeRoot", knifeRoot))
+                    {
+                        prop_knifeRoot.objectReferenceValue = knifeRoot;
+                    }
+                }
+
+                EditorGUI.BeginDisabledGroup(prop_knifeRoot.objectReferenceValue == null);
+
+                #endregion
+
+                #region Path
+
+                EditorGUI.BeginChangeCheck();
+
+                EditorGUILayout.PropertyField(prop_Path);
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    Transform trans = prop_knifeRoot.objectReferenceValue as Transform;
+                    trans.position = new Vector3(
+                        trans.position.x,
+                        prop_Path.animationCurveValue.Evaluate(0),
+                        trans.position.z
+                        );
+                }
+
+                #endregion
+
+                #region Speed
+
+                EditorGUILayout.DelayedFloatField(prop_Speed);
+
+                #endregion
+
+                #region Delay
+
+                EditorGUILayout.DelayedFloatField(prop_delay);
+
+                #endregion  
+
+                #region Move
+
+                prop_Move.boolValue = EditorGUILayout.ToggleLeft(prop_Move.displayName, prop_Move.boolValue);
+
+                #endregion
+
+                EditorGUI.EndDisabledGroup();
+
+                EditorGUI.indentLevel--;
+            }
+        }
+
+        #endregion
+
+        EditorGUI.BeginDisabledGroup(!Application.isPlaying);
+
+        if (GUILayout.Button("Chop"))
+        {
+            cp_target.ChopAllKnives();
+        }
+
+        EditorGUI.EndDisabledGroup();
+
+        if (GUILayout.Button("Settings"))
+        {
+            showSettings = !showSettings;
+        }
+
+        if (showSettings)
+        {
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField(new GUIContent("Default Values"), EditorStyles.boldLabel);
+
+            SerializedProperty
+                dk_path = sp_DefaultKnife.FindPropertyRelative("path"),
+                dk_speed = sp_DefaultKnife.FindPropertyRelative("speed"),
+                dk_move = sp_DefaultKnife.FindPropertyRelative("move"),
+                dk_delay = sp_DefaultKnife.FindPropertyRelative("delay");
+
+            EditorGUILayout.PropertyField(dk_path);
+            EditorGUILayout.PropertyField(dk_speed);
+            EditorGUILayout.PropertyField(dk_move);
+            EditorGUILayout.PropertyField(dk_delay);
+
+            EditorGUILayout.Space();
+            EditorGUILayout.Space();
+
+            EditorGUILayout.ObjectField(sp_KnifeObjectPrefab);
+        }
 
         serializedObject.ApplyModifiedProperties();
     }
 
-    void KnifeGroup()
+    bool SerializedArrayContains(SerializedProperty property, string propertyRelative, Object obj)
     {
-        sp_KnifeTransform.isExpanded = EditorGUILayout.Foldout(sp_KnifeTransform.isExpanded, knifeContent);
+        if (!property.isArray)
+            return false;
 
-        if (sp_KnifeTransform.isExpanded)
+        for (int i = 0; i < property.arraySize; i++)
         {
-            EditorGUI.indentLevel++;
+            SerializedProperty prop = property.GetArrayElementAtIndex(i).FindPropertyRelative(propertyRelative);
 
-            EditorGUILayout.PropertyField(sp_KnifeTransform, new GUIContent("Transform"));
-            EditorGUILayout.PropertyField(sp_KnifeYOffset, new GUIContent("Y Offset"));
-            EditorGUILayout.PropertyField(sp_KnifeSpeed, new GUIContent("Tracking Speed"));
-            EditorGUILayout.PropertyField(sp_KnifeDistanceTolerence, new GUIContent("Distance Tolerence"));
-
-            EditorGUI.indentLevel--;
+            if (prop != null && prop.objectReferenceValue != null)
+            {
+                if (prop.objectReferenceValue.Equals(obj))
+                    return true;
+            }
         }
-    }
 
-    void ShakeGroup()
-    {
-        if (sp_ShakeTime.isExpanded = EditorGUILayout.Foldout(sp_ShakeTime.isExpanded, shakeTitleContent))
-        {
-            EditorGUI.indentLevel++;
-
-            EditorGUILayout.PropertyField(sp_ShakeTime, new GUIContent("Time"));
-            EditorGUILayout.PropertyField(sp_ShakeAmplitude, new GUIContent("Amplitude"));
-
-            EditorGUI.indentLevel--;
-        }
-    }
-
-    void DebugGroup()
-    {
-        EditorGUILayout.PropertyField(sp_Target);
+        return false;
     }
 }
