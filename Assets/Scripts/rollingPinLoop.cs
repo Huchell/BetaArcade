@@ -9,21 +9,37 @@ public class rollingPinLoop : MonoBehaviour {
 	Vector3 startLocation;
 	Quaternion startRotation;
 	public GameObject hitTarget, endTarget;
+    public float decayTime = 5f;
+    float timer;
+    public bool delay = false;
+    public float delayAmount = 2f;
 
 	// Use this for initialization
 	void Start ()
 	{
-		rb = GetComponent<Rigidbody> ();	
+        timer = decayTime;
+		rb = GetComponent<Rigidbody> ();
 		startLocation = transform.position;
 		startRotation = transform.rotation;
-		InitialImpulse ();
+        if (!delay)
+        {
+            InitialImpulse();
+        }
+        else
+        {
+            rb.useGravity = false;
+            Debug.Log(transform.gameObject);
+        }
 	}
 		
 	public void InitialImpulse()
-	{
-		rb.velocity = Vector3.zero;
+    {
+        timer -= decayTime;
+        transform.position = startLocation;
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
 		rb.rotation = startRotation;
-		rb.AddForce (1f, -2f, 0f, ForceMode.VelocityChange);
+		rb.AddForce (1f, -4f, 0f, ForceMode.VelocityChange);
 	}
 
 	void OnCollisionEnter (Collision col)
@@ -35,9 +51,24 @@ public class rollingPinLoop : MonoBehaviour {
 
 		if (col.gameObject == endTarget)
 		{
-				Debug.Log ("RESETTING");
-				transform.position = startLocation;
 				InitialImpulse ();
 		}
 	}
+
+    private void Update()
+    {
+        timer += Time.deltaTime;
+        if (timer > decayTime && !delay)
+        {
+            InitialImpulse();
+        }
+        
+        if (timer > delayAmount+decayTime && delay)
+        {
+            delay = false;
+            rb.useGravity = true;
+            timer -= decayTime+delayAmount;
+        }
+
+    }
 }
