@@ -29,6 +29,7 @@ public class PlayerController : MonoBehaviour
     #region Component References
     private Rigidbody rb;
     private CapsuleCollider m_CapsuleCollider;
+    private Transform cam;
     #endregion
 
     #endregion
@@ -125,13 +126,14 @@ public class PlayerController : MonoBehaviour
         // Get Components
 		rb = GetComponent<Rigidbody> ();
         m_CapsuleCollider = GetComponent<CapsuleCollider>();
+        cam = transform.Find("CameraArm");
 
-        Player1.GetComponent<PlayerController>().CanMove = true;
+        /*Player1.GetComponent<PlayerController>().CanMove = true;
         Player2.GetComponent<PlayerController>().CanMove = false;
         Player1.GetComponent<PlayerController>().CanJump = true;
-        Player2.GetComponent<PlayerController>().CanJump = false;
+        Player2.GetComponent<PlayerController>().CanJump = false;*/
 
-        transform.position = SaveBox.Load();
+        //transform.position = SaveBox.Load();
     }
 
     void FixedUpdate()
@@ -197,11 +199,40 @@ public class PlayerController : MonoBehaviour
         // Apply Gravity
         ApplyDownForce();
 
-        float MouseDeltaX = (Input.GetAxis("CameraLookX"));
+        // Horizontal camera Rotation
+        float MouseDeltaX = (Input.GetAxis("Mouse X"));
+
 
         if (MouseDeltaX != 0)
         {
-            transform.Rotate(0, MouseDeltaX * Time.deltaTime * RotationSpeed, 0);
+            Quaternion rotationDelta = transform.rotation;
+            Vector3 eulerRotationDelta = rotationDelta.eulerAngles;
+
+            eulerRotationDelta.y += MouseDeltaX * Time.deltaTime * RotationSpeed;
+
+            rotationDelta.eulerAngles = eulerRotationDelta;
+            transform.rotation = rotationDelta;
+        }
+
+        // Vertical Camera Rotation
+        float MouseDeltaY = Input.GetAxis("Mouse Y");
+
+        if (MouseDeltaY != 0)
+        {
+            Quaternion rotationDelta = cam.transform.rotation;
+            Vector3 eulerRotationDelta = rotationDelta.eulerAngles;
+
+            float newx = eulerRotationDelta.x + MouseDeltaY * Time.deltaTime * RotationSpeed * -1;
+
+            if (newx < 180)
+                newx = Mathf.Min(newx, 30);
+            else
+                newx = Mathf.Max(newx, 330);
+
+            eulerRotationDelta.x = newx;
+
+            rotationDelta.eulerAngles = eulerRotationDelta;
+            cam.transform.rotation = rotationDelta;
         }
 
         // Handle Jumping Logic
