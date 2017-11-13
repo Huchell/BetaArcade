@@ -18,12 +18,6 @@ public class PlayerController : MonoBehaviour
     public bool Charging = false;
     public LayerMask groundLayers;
     public float RotationSpeed;
-    /*public Camera Camera1;
-    public Camera Camera2;
-    public GameObject Player1;
-    public GameObject Player2;
-    public bool Camera1On = true;
-    public bool Camera2On = false;*/
     public bool CanJump = true;
 
     [SerializeField]
@@ -176,46 +170,10 @@ public class PlayerController : MonoBehaviour
             camera.gameObject.SetActive(true);
             camera.targetDisplay = m_playerNumber;
         }
-
-        /*Player1.GetComponent<PlayerController>().CanMove = true;
-        Player2.GetComponent<PlayerController>().CanMove = false;
-        Player1.GetComponent<PlayerController>().CanJump = true;
-        Player2.GetComponent<PlayerController>().CanJump = false;*/
-
-        //transform.position = SaveBox.Load();
     }
 
     void FixedUpdate()
 	{
-        /*if (Camera1On)
-        {
-            if (Input.GetKeyUp(KeyCode.P))
-            {
-                Camera1.enabled = false;
-                Camera1On = false;
-                Camera2.enabled = true;
-                Camera2On = true;
-                Player2.GetComponent<PlayerController>().CanMove = true;
-                Player1.GetComponent<PlayerController>().CanMove = false;
-                Player2.GetComponent<PlayerController>().CanJump = true;
-                Player1.GetComponent<PlayerController>().CanJump = false;
-            }
-        }
-        else
-        {
-            if (Input.GetKeyUp(KeyCode.P))
-            {
-                Camera1.enabled = true;
-                Camera1On = true;
-                Camera2.enabled = false;
-                Camera2On = false;
-                Player1.GetComponent<PlayerController>().CanMove = true;
-                Player2.GetComponent<PlayerController>().CanMove = false;
-                Player1.GetComponent<PlayerController>().CanJump = true;
-                Player2.GetComponent<PlayerController>().CanJump = false;
-            }
-        }*/
-
         // If the player can move, move them
         if (CanMove)
         {
@@ -280,12 +238,46 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
+        // Horizontal camera Rotation
+        float MouseDeltaX = (Input.GetAxis("Mouse X"));
 
         if (CanJump)
         {
             // Handle Jumping Logic
             JumpButtonDown();
             JumpButtonUp();
+        }
+
+        if (MouseDeltaX > 0)
+        { 
+            Quaternion rotationDelta = transform.rotation;
+            Vector3 eulerRotationDelta = rotationDelta.eulerAngles;
+
+            eulerRotationDelta.y += MouseDeltaX * Time.deltaTime * RotationSpeed;
+
+            rotationDelta.eulerAngles = eulerRotationDelta;
+            transform.rotation = rotationDelta;
+        }
+
+        // Vertical Camera Rotation
+        float MouseDeltaY = Input.GetAxis("Mouse Y");
+
+        if (MouseDeltaY != 0)
+        {
+            Quaternion rotationDelta = cam.transform.rotation;
+            Vector3 eulerRotationDelta = rotationDelta.eulerAngles;
+
+            float newx = eulerRotationDelta.x + MouseDeltaY * Time.deltaTime * RotationSpeed * -1;
+
+            if (newx < 180)
+                newx = Mathf.Min(newx, 30);
+            else
+                newx = Mathf.Max(newx, 330);
+
+            eulerRotationDelta.x = newx;
+
+            rotationDelta.eulerAngles = eulerRotationDelta;
+            cam.transform.rotation = rotationDelta;
         }
 
         // Apply Gravity
@@ -296,18 +288,6 @@ public class PlayerController : MonoBehaviour
         {
             JumpStrength = JumpStrength + 1;
         }
-
-        //stops the player charging a jump in the air
-        /*if (Charging && !isGrounded)
-        {
-            Charging = false;
-        }*/
-
-        // Taken out and placed in the Input.GetButtonUp if statement above
-        /*if (isGrounded)
-        {
-            JumpTwo = false;
-        }*/
 	}
 
     public void OnDamage(int dmg)
