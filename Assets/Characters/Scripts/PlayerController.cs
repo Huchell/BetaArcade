@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     private bool IsSprint = false;
     public bool Charging = false;
     public LayerMask groundLayers;
-    public float RotationSpeed;
+    public float RotationSpeed = 250f;
     public bool CanJump = true;
 
     [SerializeField]
@@ -83,9 +83,14 @@ public class PlayerController : MonoBehaviour
         {
             if (transform.position != m_prevPosition)
             {
-				m_GroundRay = new Ray(transform.position + m_CapsuleCollider.center, Vector3.down);
+				m_GroundRay = new Ray(transform.position + new Vector3(
+                    m_CapsuleCollider.center.x * transform.lossyScale.x,
+                    m_CapsuleCollider.center.y * transform.lossyScale.y,
+                    m_CapsuleCollider.center.z * transform.lossyScale.z),
+                    Vector3.down
+                    );
 
-				Debug.DrawRay (m_GroundRay.origin, m_GroundRay.direction, Color.white, m_CapsuleCollider.height / 2);
+				Debug.DrawRay (m_GroundRay.origin, m_GroundRay.direction, Color.white, 1f);
                 m_prevPosition = transform.position;
             }
 
@@ -113,6 +118,7 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Used to cache the isGrounded check
     /// </summary>
+    [ReadOnly] [SerializeField]
     private bool m_isGrounded;
     /// <summary>
     /// Property finds out if the player is grounded
@@ -129,7 +135,7 @@ public class PlayerController : MonoBehaviour
                 m_lastGroundCheckTime = Time.time;
 
                 // Perform the grounded raycast
-                m_isGrounded = (Physics.Raycast(GroundRay, out m_groundHit, (m_CapsuleCollider.height / 2), groundLayers.value));
+                m_isGrounded = (Physics.Raycast(GroundRay, out m_groundHit, ((m_CapsuleCollider.height * transform.lossyScale.y) / 2) +0.1f, groundLayers.value));
             }
 
             // If you are grounded, then reset the double jump
@@ -168,8 +174,10 @@ public class PlayerController : MonoBehaviour
             CanMove = true;
             CanJump = true;
             camera.gameObject.SetActive(true);
-            camera.targetDisplay = m_playerNumber;
+            camera.targetDisplay = playerNumber;
         }
+
+        //transform.position = SaveBox.Load();
     }
 
     void FixedUpdate()
@@ -238,46 +246,12 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
-        // Horizontal camera Rotation
-        float MouseDeltaX = (Input.GetAxis("Mouse X"));
 
         if (CanJump)
         {
             // Handle Jumping Logic
             JumpButtonDown();
             JumpButtonUp();
-        }
-
-        if (MouseDeltaX > 0)
-        { 
-            Quaternion rotationDelta = transform.rotation;
-            Vector3 eulerRotationDelta = rotationDelta.eulerAngles;
-
-            eulerRotationDelta.y += MouseDeltaX * Time.deltaTime * RotationSpeed;
-
-            rotationDelta.eulerAngles = eulerRotationDelta;
-            transform.rotation = rotationDelta;
-        }
-
-        // Vertical Camera Rotation
-        float MouseDeltaY = Input.GetAxis("Mouse Y");
-
-        if (MouseDeltaY != 0)
-        {
-            Quaternion rotationDelta = cam.transform.rotation;
-            Vector3 eulerRotationDelta = rotationDelta.eulerAngles;
-
-            float newx = eulerRotationDelta.x + MouseDeltaY * Time.deltaTime * RotationSpeed * -1;
-
-            if (newx < 180)
-                newx = Mathf.Min(newx, 30);
-            else
-                newx = Mathf.Max(newx, 330);
-
-            eulerRotationDelta.x = newx;
-
-            rotationDelta.eulerAngles = eulerRotationDelta;
-            cam.transform.rotation = rotationDelta;
         }
 
         // Apply Gravity
@@ -333,7 +307,8 @@ public class PlayerController : MonoBehaviour
 
         float z = Input.GetAxisRaw(GetInputStringFromPlayer("Vertical")) * Speed * Time.deltaTime;
 
-        transform.Translate(x, 0, z);
+        //transform.Translate(x, 0, z);
+        rb.MovePosition(rb.position + transform.TransformVector(new Vector3(x, 0, z)));
     }
 
     #region Jump Methods
