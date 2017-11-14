@@ -19,6 +19,7 @@ public class PlayerController : MonoBehaviour
     public LayerMask groundLayers;
     public float RotationSpeed = 250f;
     public bool CanJump = true;
+    public int flipHorizontal = 1;
 
     [SerializeField]
     private int m_playerNumber = -1;
@@ -195,7 +196,7 @@ public class PlayerController : MonoBehaviour
                 Quaternion rotationDelta = transform.rotation;
                 Vector3 eulerRotationDelta = rotationDelta.eulerAngles;
 
-                eulerRotationDelta.y += MouseDeltaX * Time.deltaTime * RotationSpeed;
+                eulerRotationDelta.y += MouseDeltaX * Time.deltaTime * RotationSpeed * flipHorizontal;
 
                 rotationDelta.eulerAngles = eulerRotationDelta;
                 transform.rotation = rotationDelta;
