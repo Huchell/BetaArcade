@@ -10,9 +10,16 @@ ModelImporter:
     2300000: //RootNode
     3300000: //RootNode
     4300000: Cylinder001
+<<<<<<< HEAD
     9500000: //RootNode
   materials:
     importMaterials: 1
+=======
+    6400000: //RootNode
+    9500000: //RootNode
+  materials:
+    importMaterials: 0
+>>>>>>> refs/remotes/origin/Build-0.0.1
     materialName: 0
     materialSearch: 1
   animations:
