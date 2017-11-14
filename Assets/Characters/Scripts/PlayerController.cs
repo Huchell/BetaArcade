@@ -44,7 +44,6 @@ public class PlayerController : MonoBehaviour
                 CanMove = true;
                 CanJump = true;
                 camera.gameObject.SetActive(true);
-                camera.targetDisplay = m_playerNumber;
             }
         }
     }
@@ -57,7 +56,7 @@ public class PlayerController : MonoBehaviour
     #region Component References
     private Rigidbody rb;
     private CapsuleCollider m_CapsuleCollider;
-    new private Camera camera;
+    new public Camera camera;
     private Transform cameraArm;
     #endregion
 

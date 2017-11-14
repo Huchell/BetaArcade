@@ -47,6 +47,14 @@ public class PlayerManager : MonoBehaviour {
 
                 m_playerControllers[newIndex].playerNumber = 0;
             }
+
+            if (Input.GetButtonDown("Jump_1"))
+            {
+                m_playerControllers[1].playerNumber = 1;
+
+                m_playerControllers[0].camera.rect = new Rect(.0f, .0f, .5f, 1f);
+                m_playerControllers[1].camera.rect = new Rect(.5f, .0f, .5f, 1f);
+            }
         }
     }
 
