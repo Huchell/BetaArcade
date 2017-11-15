@@ -6,7 +6,7 @@ public class BoxPush : MonoBehaviour
 {
     public List<Vector3> nodeList = new List<Vector3>();
     public List<GameObject> nodesInWorld = new List<GameObject>();
-    public int nodeCount = 3;
+    public int nodeCount;
     public GameObject nodeMesh;
 
     /*
@@ -16,10 +16,12 @@ public class BoxPush : MonoBehaviour
      *  box is always on a 'path' between two 'nodes' which are declared in editor script
      *  if box hits one of a pair of 'auto nodes' the box will move along that path of it's own accord, from 'start' node to 'end' node.
      *  auto nodes are only used for one-directional movement, such as the box sliding or falling down.
+     *  
      */
 
     void Start()
     {
+        
 	}
 
     public void RefreshNodes()
@@ -28,6 +30,12 @@ public class BoxPush : MonoBehaviour
         {
             DestroyImmediate(node);
         }
+
+        foreach (Transform child in transform)
+        {
+            GameObject.DestroyImmediate(child.gameObject);
+        }
+                
         nodesInWorld.Clear();
 
         if (nodeList.Count < 1)
@@ -37,7 +45,7 @@ public class BoxPush : MonoBehaviour
 
         while (nodeList.Count < nodeCount)
         {
-            nodeList.Add(transform.position + new Vector3(0f, 10f, 0f));
+            nodeList.Add(nodeList[nodeList.Count-1] + new Vector3(0f, 2f, 0f));
         }
 
         for (int x = 0; x < nodeCount; x++)
@@ -61,9 +69,21 @@ public class BoxPush : MonoBehaviour
             }
             else
             {
-                nodeList[x] = (nodeList[x - 1] + new Vector3(0f, 10f, 0f));
-                Debug.Log("offset by 10");
+                nodeList[x] = (nodeList[x - 1] + new Vector3(0f, 2f, 0f));
+                Debug.Log("offset by 2");
                 newNode.transform.position = nodeList[x];
+            }
+        }
+              
+        if (nodeList.Count > nodeCount)
+        {
+            for (int x = nodeList.Count-1; x >= nodeCount; x--)
+            {
+                Debug.Log(x);
+                if (nodeList[x] != null)
+                {
+                    nodeList.Remove(nodeList[x]);
+                }
             }
         }
 
@@ -108,4 +128,16 @@ public class BoxPush : MonoBehaviour
         }
         */
     }
+
+    public void RefreshNodeLocations()
+    {
+        nodeList[0] = transform.position + new Vector3(2f, 0f, 0f);
+        for (int node = 1; node < nodeList.Count; node++)
+        {
+            nodeList[node] = transform.position + new Vector3((node+1) * 2f, 0f, 0f);
+        }
+        RefreshNodes();
+    }
+    
+
 }
