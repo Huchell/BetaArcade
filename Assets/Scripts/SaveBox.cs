@@ -10,9 +10,12 @@ public class SaveBox : MonoBehaviour
     //SaveLoad saveFile;
     [SerializeField]
     public static Vector3 playerPosition;
+    public Transform player;
+    static Vector3 playerEditorLocation;
 
     public void Start()
     {
+        playerEditorLocation = player.transform.position;
         Debug.Log("START");
         Debug.Log(Load()); //DO NOT DO THIS HERE, otherwise the game will attempt to load position for EVERY existing savebox.
         //Load would be setting player.transform.position = SaveLoad.Load();
@@ -56,7 +59,7 @@ public class SaveBox : MonoBehaviour
             return new Vector3(data.playerPositionX, data.playerPositionY, data.playerPositionZ);
         }
         Debug.Log("No value loaded");
-        return Vector3.zero;
+        return playerEditorLocation;
     }
 }
 

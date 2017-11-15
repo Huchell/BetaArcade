@@ -2,7 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BoxPush : MonoBehaviour {
+public class BoxPush : MonoBehaviour
+{
+    public List<Vector3> nodeList = new List<Vector3>();
+    public List<GameObject> nodesInWorld = new List<GameObject>();
+    public int nodeCount = 3;
+    public GameObject nodeMesh;
 
     /*
      *  when box walked into from a 'push direction', box is pushable.
@@ -13,21 +18,94 @@ public class BoxPush : MonoBehaviour {
      *  auto nodes are only used for one-directional movement, such as the box sliding or falling down.
      */
 
-
-
-
-
-    /*
-
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
+    void Start()
+    {
 	}
 
-    */
+    public void RefreshNodes()
+    {
+        foreach (GameObject node in nodesInWorld)
+        {
+            DestroyImmediate(node);
+        }
+        nodesInWorld.Clear();
+
+        if (nodeList.Count < 1)
+        {
+            nodeList.Add(transform.position);
+        }
+
+        while (nodeList.Count < nodeCount)
+        {
+            nodeList.Add(transform.position + new Vector3(0f, 10f, 0f));
+        }
+
+        for (int x = 0; x < nodeCount; x++)
+        {
+            GameObject newNode = Instantiate(nodeMesh);
+            nodesInWorld.Add(newNode);
+            newNode.name += "[" + x + "]";
+
+            newNode.transform.SetParent(transform, false);
+
+            if (nodeList[x] != null || nodeList[x] == Vector3.zero)
+            {
+                Debug.Log("not null");
+                newNode.transform.position = nodeList[x];
+            }
+            else if (x == 0)
+            {
+                nodeList[x] = transform.position;
+                Debug.Log("using parent");
+                newNode.transform.position = nodeList[x];
+            }
+            else
+            {
+                nodeList[x] = (nodeList[x - 1] + new Vector3(0f, 10f, 0f));
+                Debug.Log("offset by 10");
+                newNode.transform.position = nodeList[x];
+            }
+        }
+
+        /*
+
+        for (int x = nodeList.Count; x >= nodeCount; x--)
+        {
+            nodeList.RemoveAt(x);
+        }
+        
+         * 
+         * 
+         * 
+         * 
+         * 
+         *  I want to be able to say: here's a list of world positions.
+         *  For the world positions from 0 to the nodeCount, put a node object there
+         *  For any world positions higher than nodeCount, remove.
+         *  If a world position for a node index less than nodeCount is not defined, define it as the world position of the previous node, plus 10f in y.
+         *  
+         *  On refresh, remove and replace all nodes.
+         *  If a node is moved, update it's world position in the list.
+         *  If a node is deleted, reduce the index of all nodes further in the list by 1.
+         *
+         */
+
+
+        /*
+        int keepCount = nodeList.Count;
+        if (keepCount > nodeCount)
+        {
+            for (int x = nodeCount; x < keepCount; x++)
+            {
+                //DestroyImmediate(nodeList[x]);
+            }
+        }
+
+        //nodeList.Clear(); do later
+        for (int x = 0; x < nodeCount; x++)
+        {
+            //nodeList[x].gameObject.transform.position = new Vector3(20f * x, 0f, 0f);
+        }
+        */
+    }
 }
