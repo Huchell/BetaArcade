@@ -21,6 +21,12 @@ public class PlayerController : MonoBehaviour
     public bool CanJump = true;
     public int flipHorizontal = 1;
 
+    private bool m_isMoving = false;
+    public bool isMoving
+    {
+        get { return m_isMoving; }
+    }
+
     [SerializeField]
     private int m_playerNumber = -1;
 
@@ -56,8 +62,9 @@ public class PlayerController : MonoBehaviour
     #region Component References
     private Rigidbody rb;
     private CapsuleCollider m_CapsuleCollider;
-    new public Camera camera;
+    [HideInInspector]new public Camera camera;
     private Transform cameraArm;
+    private Animator m_Animator;
     #endregion
 
     #endregion
@@ -143,6 +150,7 @@ public class PlayerController : MonoBehaviour
             {
                 JumpTwo = false;
                 rb.velocity = Vector3.zero;
+                m_Animator.SetBool("isJumping", false);
             }
 
             m_groundedLastFrame = m_isGrounded;
@@ -162,6 +170,8 @@ public class PlayerController : MonoBehaviour
         m_CapsuleCollider = GetComponent<CapsuleCollider>();
         cameraArm = transform.Find("CameraArm");
         camera = cameraArm.GetComponentInChildren<Camera>();
+
+        m_Animator = GetComponentInChildren<Animator>();
 
         if (playerNumber < 0)
         {
@@ -192,13 +202,14 @@ public class PlayerController : MonoBehaviour
 
             if (MouseDeltaX != 0)
             {
-                Quaternion rotationDelta = transform.rotation;
-                Vector3 eulerRotationDelta = rotationDelta.eulerAngles;
-
-                eulerRotationDelta.y += MouseDeltaX * Time.deltaTime * RotationSpeed * flipHorizontal;
-
-                rotationDelta.eulerAngles = eulerRotationDelta;
-                transform.rotation = rotationDelta;
+                /*if (isMoving)
+                {
+                    transform.Rotate(Vector3.up, MouseDeltaX * Time.deltaTime * RotationSpeed * flipHorizontal, Space.Self);
+                }
+                else
+                {*/
+                    cameraArm.transform.Rotate(Vector3.up, MouseDeltaX * Time.deltaTime * RotationSpeed * flipHorizontal, Space.World);
+                //}
             }
 
             // Vertical Camera Rotation
@@ -303,12 +314,21 @@ public class PlayerController : MonoBehaviour
     #region Movement
     void ApplyMovement()
     {
-        float x = Input.GetAxisRaw(GetInputStringFromPlayer("Horizontal")) * Speed * Time.deltaTime;
+        float x_axis = Input.GetAxis(GetInputStringFromPlayer("Horizontal")), z_axis = Input.GetAxis(GetInputStringFromPlayer("Vertical"));
+        
+        float x = x_axis * Speed * Time.deltaTime;
 
-        float z = Input.GetAxisRaw(GetInputStringFromPlayer("Vertical")) * Speed * Time.deltaTime;
+        float z = z_axis * Speed * Time.deltaTime;
 
         //transform.Translate(x, 0, z);
         rb.MovePosition(rb.position + transform.TransformVector(new Vector3(x, 0, z)));
+
+        m_isMoving = (x != 0 || z != 0);
+
+        //m_Animator.applyRootMotion = !isMoving;
+
+        m_Animator.SetFloat("Z_Axis", z_axis);
+        m_Animator.SetBool("isMoving", isMoving);
     }
 
     #region Jump Methods
@@ -371,6 +391,8 @@ public class PlayerController : MonoBehaviour
         rb.velocity = velo;
 
         rb.AddForce(Vector3.up * strength, ForceMode.Impulse);
+
+        m_Animator.SetBool("isJumping", true);
     }
 
     private void ChargeJump(float strength)

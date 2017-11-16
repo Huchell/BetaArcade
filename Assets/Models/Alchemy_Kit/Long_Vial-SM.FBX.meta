@@ -1,7 +1,5 @@
 fileFormatVersion: 2
 guid: 670db2689e9c98940894c7be2ee5c157
-timeCreated: 1510102559
-licenseType: Pro
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
@@ -10,16 +8,9 @@ ModelImporter:
     2300000: //RootNode
     3300000: //RootNode
     4300000: Cylinder001
-<<<<<<< HEAD
     9500000: //RootNode
   materials:
     importMaterials: 1
-=======
-    6400000: //RootNode
-    9500000: //RootNode
-  materials:
-    importMaterials: 0
->>>>>>> refs/remotes/origin/Build-0.0.1
     materialName: 0
     materialSearch: 1
   animations:
@@ -44,7 +35,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 8
+    globalScale: 0
     meshCompression: 0
     addColliders: 0
     importBlendShapes: 1

@@ -6,80 +6,95 @@ using UnityEngine;
 public class PlayerManager : MonoBehaviour {
 
     // Singleton
-
-    private PlayerController[] m_playerControllers;
-
-    public int NumberOfPlayerControllers
+    private static PlayerManager instance;
+    public static PlayerManager Instance
     {
         get
         {
-            return m_playerControllers.Length;
+            if (instance == null)
+            {
+                GameObject pm = new GameObject("Player Manager");
+                pm.AddComponent<PlayerManager>();
+            }
+
+            return instance;
         }
+    }
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else if (instance != this)
+            Destroy(gameObject);
+    }
+    private void OnDestroy()
+    {
+        if (instance == this)
+            instance = null;
     }
 
-    public int NumberOfControlledPlayerControllers
-    {
-        get
-        {
-            return m_playerControllers.Where(pc => pc.playerNumber >= 0).ToArray().Length;
-        }
-    }
+    private PlayerController2[] controllers;
 
     private void Start()
     {
-        m_playerControllers = FindObjectsOfType<PlayerController>();
+        controllers = FindObjectsOfType<PlayerController2>();
     }
     private void FixedUpdate()
     {
-        if (NumberOfControlledPlayerControllers == 1)
+        if (Input.GetKeyDown(KeyCode.P))
         {
-            // 1 Player Stuff
-            if (Input.GetKeyDown(KeyCode.P))
-            {
-                int index = FindCurrentPlayer();
+            int index = GetCurrentControllerIndex();
 
-                if (index < 0)
-                    return;
+            SwitchPlayer(controllers[index], controllers[(int)Mathf.Repeat(index + 1, controllers.Length)]);
+        }
 
-                m_playerControllers[index].playerNumber = -1;
-
-                int newIndex = (int)Mathf.Repeat(index + 1, NumberOfPlayerControllers);
-
-                m_playerControllers[newIndex].playerNumber = 0;
-            }
-
-            if (Input.GetButtonDown("Jump_1"))
-            {
-                m_playerControllers[1].playerNumber = 1;
-
-                m_playerControllers[0].camera.rect = new Rect(.0f, .0f, .5f, 1f);
-                m_playerControllers[1].camera.rect = new Rect(.5f, .0f, .5f, 1f);
-            }
+        if (Input.GetButtonDown("Jump_2"))
+        {
+            InitializePlayer();
         }
     }
 
-    private int FindCurrentPlayer()
+    private void InitializePlayer()
     {
-        for (int i = 0; i  < NumberOfPlayerControllers; i++)
-        {
-            if (m_playerControllers[i].playerNumber >= 0)
-            {
-                return i;
-            }
-        }
+        int index = (int)Mathf.Repeat(GetCurrentControllerIndex() + 1, controllers.Length);
 
-        return -1;
+        if (controllers[index].playerNumber == 0)
+        {
+            controllers[index].playerNumber = GetFirstController().playerNumber + 1;
+
+            GameObject camObj = new GameObject("Camera");
+            ThirdPersonCamera tpc = camObj.AddComponent<ThirdPersonCamera>();
+            tpc.player = controllers[index];
+            tpc.target = controllers[index].transform.Find("CameraLookAt");
+
+            controllers[index].camera = tpc;
+        }
     }
 
-    public void AddPlayer(PlayerController controller)
+    private void SwitchPlayer(PlayerController2 oldController, PlayerController2 newController)
     {
-        if (!m_playerControllers.Contains(controller))
-        {
-            PlayerController[] newArray = new PlayerController[m_playerControllers.Length + 1];
-            newArray.Intersect(m_playerControllers);
-            newArray[newArray.Length - 1] = controller;
+        newController.camera = oldController.camera;
 
-            m_playerControllers = newArray;
-        }
+        Transform lookAt = newController.transform.Find("CameraLookAt");
+        newController.camera.target = lookAt ? lookAt : newController.transform;
+        newController.camera.player = newController;
+
+        newController.playerNumber = oldController.playerNumber;
+
+        oldController.playerNumber = 0;
+        oldController.camera = null;
+    }
+
+    private PlayerController2[] GetCurrentControllers()
+    {
+        return controllers.Where(c => c.playerNumber == 1).ToArray();
+    }
+    private PlayerController2 GetFirstController()
+    {
+        return GetCurrentControllers()[0];
+    }
+    private int GetCurrentControllerIndex()
+    {
+        return System.Array.FindIndex(controllers, c => c == GetFirstController());
     }
 }
