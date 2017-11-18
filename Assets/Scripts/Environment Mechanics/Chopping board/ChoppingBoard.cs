@@ -20,6 +20,24 @@ public class ChoppingBoard : MonoBehaviour {
     [SerializeField]
     private float m_choppedDelay = 0f;
 
+    private Transform m_KnifeHolder;
+    public Transform KnifeHolder
+    {
+        get
+        {
+            if (!m_KnifeHolder)
+            {
+                m_KnifeHolder = transform.Find("KnifeHolder");
+                if (!m_KnifeHolder)
+                {
+                    m_KnifeHolder = new GameObject("KnifeHolder").transform;
+                }
+            }
+
+            return m_KnifeHolder;
+        }
+    }
+
     private void Start()
     {
         if (m_ChopOnStart)
@@ -82,9 +100,11 @@ public class ChoppingBoard : MonoBehaviour {
         }
     }
 
+
+    #region Initialize Knives
+
     public void AddKnife()
     {
-        Debug.Log("Add Knife");
         Knife[] newArray = new Knife[knives.Length + 1];
 
         for (int i = 0; i < knives.Length; i++)
@@ -93,15 +113,14 @@ public class ChoppingBoard : MonoBehaviour {
         newArray[newArray.Length - 1] = CreateKnifeObject();
         knives = newArray;
     }
-
     private Knife CreateKnifeObject()
     {
-        Debug.Log("Create Knife Object");
         Knife newKnife;
 
         if (knifeObjectPrefab)
         {
-            newKnife = Instantiate(knifeObjectPrefab, transform.Find("KnifeHolder"));
+            newKnife = Instantiate(knifeObjectPrefab, KnifeHolder);
+
         }
         else
         {
@@ -112,12 +131,14 @@ public class ChoppingBoard : MonoBehaviour {
             newKnife = gm.GetComponent<Knife>();
         }
 
+        newKnife.transform.localPosition = Vector3.zero;
+        newKnife.transform.localRotation = Quaternion.identity;
+
         return newKnife;
     }
 
     public void RemoveKnife(int index, bool destroyKnife = true)
     {
-        Debug.Log("Remove Knife");
         if (index < 0 || index >= knives.Length)
             return;
 
@@ -142,4 +163,6 @@ public class ChoppingBoard : MonoBehaviour {
                 DestroyImmediate(removeKnife.gameObject);
         }
     }
+
+    #endregion
 }
