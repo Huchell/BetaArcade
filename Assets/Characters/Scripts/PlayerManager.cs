@@ -56,6 +56,12 @@ public class PlayerManager : MonoBehaviour {
                 InitializePlayer();
             }
         }
+        else
+        {
+            PlayerController2[] conts = GetCurrentControllers();
+            conts[0].CameraSettings.CameraReference.GetComponent<Camera>().rect = new Rect(0, 0, 0.5f, 0);
+            conts[1].CameraSettings.CameraReference.GetComponent<Camera>().rect = new Rect(0.5f, 0, 0.5f, 0);
+        }
     }
 
     private void InitializePlayer()
@@ -80,7 +86,7 @@ public class PlayerManager : MonoBehaviour {
 
     private PlayerController2[] GetCurrentControllers()
     {
-        return controllers.Where(c => c.playerNumber == 1).ToArray();
+        return controllers.Where(c => c.playerNumber >= 1).ToArray();
     }
     private PlayerController2 GetFirstController()
     {
