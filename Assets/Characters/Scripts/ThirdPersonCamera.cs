@@ -7,6 +7,7 @@ public class ThirdPersonCamera : MonoBehaviour {
     public bool lockCursor;
     public float mouseSensitivityX = 7;
     public float mouseSensitivityY = 5;
+    [HideInInspector]
     public Transform target;
     public PlayerController2 player;
     public float distanceFromTraget = 2;
@@ -22,7 +23,11 @@ public class ThirdPersonCamera : MonoBehaviour {
     void Start()
     {
         if (player)
-            player.camera = this;
+        {
+            player.CameraSettings.CameraReference = this;
+            target = player.transform.Find("CameraLookAt");
+            if (target == null) target = player.transform;
+        }
         else
             enabled = false;
 
@@ -38,8 +43,8 @@ public class ThirdPersonCamera : MonoBehaviour {
         if (player.playerNumber <= 0)
             return;
 
-        yaw += Input.GetAxis(player.GetInputString("Mouse X")) * mouseSensitivityX;
-        pitch -= Input.GetAxis(player.GetInputString("Mouse Y")) * mouseSensitivityY;
+        yaw += Input.GetAxis(player.GetInputString("Mouse X")) /* mouseSensitivityX */ * player.CameraSettings.LookSensitivityX;
+        pitch -= Input.GetAxis(player.GetInputString("Mouse Y")) /* mouseSensitivityY */ * player.CameraSettings.LookSensitivityY;
         pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
 
         currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothTime);
@@ -48,4 +53,9 @@ public class ThirdPersonCamera : MonoBehaviour {
 
         transform.position = target.position - transform.forward * distanceFromTraget;
 	}
+
+    public void SetActive(bool value)
+    {
+        gameObject.SetActive(value);
+    }
 }

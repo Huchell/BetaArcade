@@ -20,6 +20,7 @@ public class PlayerManager : MonoBehaviour {
             return instance;
         }
     }
+
     private void Awake()
     {
         if (instance == null)
@@ -41,16 +42,19 @@ public class PlayerManager : MonoBehaviour {
     }
     private void FixedUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.P))
+        if (controllers.Where(c => c.playerNumber > 0).ToArray().Length == 1)
         {
-            int index = GetCurrentControllerIndex();
+            if (Input.GetButtonDown("Switch"))
+            {
+                int index = GetCurrentControllerIndex();
 
-            SwitchPlayer(controllers[index], controllers[(int)Mathf.Repeat(index + 1, controllers.Length)]);
-        }
+                SwitchPlayer(controllers[index], controllers[(int)Mathf.Repeat(index + 1, controllers.Length)]);
+            }
 
-        if (Input.GetButtonDown("Jump_2"))
-        {
-            InitializePlayer();
+            if (Input.GetButtonDown("Jump_2"))
+            {
+                InitializePlayer();
+            }
         }
     }
 
@@ -60,29 +64,18 @@ public class PlayerManager : MonoBehaviour {
 
         if (controllers[index].playerNumber == 0)
         {
-            controllers[index].playerNumber = GetFirstController().playerNumber + 1;
-
-            GameObject camObj = new GameObject("Camera");
-            ThirdPersonCamera tpc = camObj.AddComponent<ThirdPersonCamera>();
-            tpc.player = controllers[index];
-            tpc.target = controllers[index].transform.Find("CameraLookAt");
-
-            controllers[index].camera = tpc;
+            controllers[index].playerNumber = 2;
+            controllers[index].CameraSettings.CameraReference.SetActive(true);
         }
     }
 
     private void SwitchPlayer(PlayerController2 oldController, PlayerController2 newController)
     {
-        newController.camera = oldController.camera;
-
-        Transform lookAt = newController.transform.Find("CameraLookAt");
-        newController.camera.target = lookAt ? lookAt : newController.transform;
-        newController.camera.player = newController;
-
-        newController.playerNumber = oldController.playerNumber;
+        oldController.CameraSettings.CameraReference.SetActive(false);
+        newController.CameraSettings.CameraReference.SetActive(true);
 
         oldController.playerNumber = 0;
-        oldController.camera = null;
+        newController.playerNumber = 1;
     }
 
     private PlayerController2[] GetCurrentControllers()
