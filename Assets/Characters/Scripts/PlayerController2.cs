@@ -104,7 +104,7 @@ public class PlayerController2 : MonoBehaviour {
             }
 
             //bool running = Input.GetButton("Sprint");
-            bool running = Input.GetAxis(GetInputString("Sprint")) > 0;
+            bool running = Mathf.Abs(Input.GetAxis(GetInputString("Sprint"))) > 0;
             float targetSpeed = ((running) ? runSpeed : walkSpeed) * inputDir.magnitude;
 
             currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);

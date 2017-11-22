@@ -66,9 +66,18 @@ public class PlayerManager : MonoBehaviour {
         {
             controllers[index].playerNumber = 2;
             controllers[index].CameraSettings.CameraReference.SetActive(true);
+
+            SplitScreen();
         }
     }
 
+    void SplitScreen()
+    {
+        PlayerController2[] conts = GetCurrentControllers();
+
+        conts[0].CameraSettings.CameraReference.GetComponent<Camera>().rect = new Rect(0, 0, 0.5f, 1);
+        conts[1].CameraSettings.CameraReference.GetComponent<Camera>().rect = new Rect(0.5f, 0, 0.5f, 1);
+    }
     private void SwitchPlayer(PlayerController2 oldController, PlayerController2 newController)
     {
         oldController.CameraSettings.CameraReference.SetActive(false);
@@ -80,7 +89,11 @@ public class PlayerManager : MonoBehaviour {
 
     private PlayerController2[] GetCurrentControllers()
     {
+<<<<<<< HEAD
         return controllers.Where(c => c.playerNumber > 0).ToArray();
+=======
+        return controllers.Where(c => c.playerNumber >= 1).ToArray();
+>>>>>>> Build-0.0.2
     }
     private PlayerController2 GetFirstController()
     {
