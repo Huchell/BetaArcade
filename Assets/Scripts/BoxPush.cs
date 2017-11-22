@@ -4,10 +4,15 @@ using UnityEngine;
 
 public class BoxPush : MonoBehaviour
 {
+    [ReadOnly]
     public List<Vector3> nodeList = new List<Vector3>();
+    [ReadOnly]
     public List<GameObject> nodesInWorld = new List<GameObject>();
     public int nodeCount;
     public GameObject nodeMesh;
+    public int atNode = 0;
+    [HideInInspector]
+    public bool pushingNorth = false, pushingEast = false, pushingSouth = false, pushingWest = false;
 
     /*
      *  when box walked into from a 'push direction', box is pushable.
@@ -16,26 +21,25 @@ public class BoxPush : MonoBehaviour
      *  box is always on a 'path' between two 'nodes' which are declared in editor script
      *  if box hits one of a pair of 'auto nodes' the box will move along that path of it's own accord, from 'start' node to 'end' node.
      *  auto nodes are only used for one-directional movement, such as the box sliding or falling down.
-     *  
      */
 
     void Start()
     {
-        
-	}
+        foreach (GameObject node in nodesInWorld)
+        {
+            node.GetComponent<MeshRenderer>().enabled = false;
+        }
+
+        transform.position = nodeList[atNode];
+    }
 
     public void RefreshNodes()
     {
         foreach (GameObject node in nodesInWorld)
         {
-            DestroyImmediate(node);
+            DestroyImmediate(node.gameObject);
         }
 
-        foreach (Transform child in transform)
-        {
-            GameObject.DestroyImmediate(child.gameObject);
-        }
-                
         nodesInWorld.Clear();
 
         if (nodeList.Count < 1)
@@ -45,7 +49,7 @@ public class BoxPush : MonoBehaviour
 
         while (nodeList.Count < nodeCount)
         {
-            nodeList.Add(nodeList[nodeList.Count-1] + new Vector3(0f, 2f, 0f));
+            nodeList.Add(nodeList[nodeList.Count - 1] + new Vector3(0f, 2f, 0f));
         }
 
         for (int x = 0; x < nodeCount; x++)
@@ -54,18 +58,18 @@ public class BoxPush : MonoBehaviour
             nodesInWorld.Add(newNode);
             newNode.name += "[" + x + "]";
 
-            newNode.transform.SetParent(transform, false);
+            newNode.transform.SetParent(transform.parent, false);
 
-            if (nodeList[x] != null || nodeList[x] == Vector3.zero)
+            if (nodeList[x] != null)
             {
                 Debug.Log("not null");
                 newNode.transform.position = nodeList[x];
             }
             else if (x == 0)
             {
-                nodeList[x] = transform.position;
+                nodeList[0] = transform.position;
                 Debug.Log("using parent");
-                newNode.transform.position = nodeList[x];
+                newNode.transform.position = transform.position;
             }
             else
             {
@@ -74,10 +78,10 @@ public class BoxPush : MonoBehaviour
                 newNode.transform.position = nodeList[x];
             }
         }
-              
+
         if (nodeList.Count > nodeCount)
         {
-            for (int x = nodeList.Count-1; x >= nodeCount; x--)
+            for (int x = nodeList.Count - 1; x >= nodeCount; x--)
             {
                 Debug.Log(x);
                 if (nodeList[x] != null)
@@ -87,6 +91,11 @@ public class BoxPush : MonoBehaviour
             }
         }
 
+        SuggestPushAlignments();
+
+        /*
+        nodesInWorld[0].transform.position = transform.position;
+        nodeList[0] = transform.position;
         /*
 
         for (int x = nodeList.Count; x >= nodeCount; x--)
@@ -131,13 +140,63 @@ public class BoxPush : MonoBehaviour
 
     public void RefreshNodeLocations()
     {
-        nodeList[0] = transform.position + new Vector3(2f, 0f, 0f);
+        nodeList[0] = transform.position;
         for (int node = 1; node < nodeList.Count; node++)
         {
-            nodeList[node] = transform.position + new Vector3((node+1) * 2f, 0f, 0f);
+            nodeList[node] = transform.position + new Vector3((node) * 2f, 0f, 0f);
         }
         RefreshNodes();
     }
-    
 
+    public void SuggestPushAlignments()
+    {
+        for (int x = 1; x < nodesInWorld.Count; x++)
+        {
+            nodesInWorld[x].gameObject.GetComponent<PushBoxNodeData>().SuggestPushes(nodesInWorld[0].gameObject.transform);
+            Debug.Log("node" + x + " handled");
+        }
+    }
+
+    public void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.tag == "Player")
+        {
+            if (collision.gameObject.transform.position.x > transform.position.x)
+            {
+                pushingEast = false;
+                pushingWest = true;
+            }
+            else
+            {
+                pushingEast = true;
+                pushingWest = false;
+            }
+
+            if (collision.gameObject.transform.position.z > transform.position.z)
+            {
+                pushingNorth = false;
+                pushingSouth = true;
+            }
+            else
+            {
+                pushingNorth = true;
+                pushingSouth = false;
+            }
+        }
+
+        if (collision.collider.tag == "BoxNode")
+        {
+            transform.position = collision.gameObject.transform.position;
+            
+            //set box position to the boxnodes position, at node = boxNode index
+        }
+    }
+
+    public void OnCollisionExit(Collision collision)
+    {
+        if (collision.collider.tag == "Player")
+        {
+            pushingNorth = pushingEast = pushingSouth = pushingWest = false;
+        }
+    }
 }
