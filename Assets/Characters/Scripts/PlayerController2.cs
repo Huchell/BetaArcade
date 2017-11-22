@@ -174,7 +174,6 @@ public class PlayerController2 : MonoBehaviour {
 
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        Debug.Log("Hit");
+        
     }
-
 }

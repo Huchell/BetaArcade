@@ -89,11 +89,7 @@ public class PlayerManager : MonoBehaviour {
 
     private PlayerController2[] GetCurrentControllers()
     {
-<<<<<<< HEAD
         return controllers.Where(c => c.playerNumber > 0).ToArray();
-=======
-        return controllers.Where(c => c.playerNumber >= 1).ToArray();
->>>>>>> Build-0.0.2
     }
     private PlayerController2 GetFirstController()
     {
