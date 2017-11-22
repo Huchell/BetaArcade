@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class BoxPush : MonoBehaviour
 {
-    [ReadOnly]
+    //[ReadOnly]
     public List<Vector3> nodeList = new List<Vector3>();
-    [ReadOnly]
+    //[ReadOnly]
     public List<GameObject> nodesInWorld = new List<GameObject>();
     public int nodeCount;
     public GameObject nodeMesh;
@@ -28,7 +28,12 @@ public class BoxPush : MonoBehaviour
     {
         foreach (GameObject node in nodesInWorld)
         {
-            node.GetComponent<MeshRenderer>().enabled = false;
+            try
+            {
+                node.GetComponent<MeshRenderer>().enabled = false;
+            }
+            catch
+            { }
         }
 
         transform.position = nodeList[atNode];
@@ -184,6 +189,7 @@ public class BoxPush : MonoBehaviour
     {
         if (collision.collider.tag == "Player")
         {
+            Debug.Log("playerin");
             if (collision.gameObject.transform.position.x > transform.position.x)
             {
                 pushingEast = false;
@@ -211,17 +217,28 @@ public class BoxPush : MonoBehaviour
                 (nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushTo == PushBoxNodeData.collisionSide.South && pushingSouth)||
                 (nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushTo == PushBoxNodeData.collisionSide.West && pushingWest))
             {
-                betweenNode += 0.05f;
+                betweenNode += 0.01f;
+                Mathf.Clamp(betweenNode, 0.0f, 1.0f);
             }
             else if ((nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushAway == PushBoxNodeData.collisionSide.North && pushingNorth) ||
                     (nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushAway == PushBoxNodeData.collisionSide.East && pushingEast) ||
                     (nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushAway == PushBoxNodeData.collisionSide.South && pushingSouth) ||
                     (nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushAway == PushBoxNodeData.collisionSide.West && pushingWest))
                     {
-                        betweenNode -= 0.05f;
-                    }
+                        betweenNode -= 0.01f;
+                        Mathf.Clamp(betweenNode, 0.0f, 1.0f);
+            }
 
-            transform.position = Vector3.Lerp(nodesInWorld[atNode - 1].gameObject.transform.position, nodesInWorld[atNode].gameObject.transform.position, betweenNode);
+            transform.position = Vector3.Lerp(nodesInWorld[atNode].gameObject.transform.position, nodesInWorld[atNode+1].gameObject.transform.position, betweenNode);
+
+            if (betweenNode >= 1.0f)
+            {
+                transform.position = nodesInWorld[atNode + 1].transform.position;
+                atNode++;
+                betweenNode = 0.0f;
+                Debug.Log("AT NODE " + atNode);
+            }
+
         }
     }
 
