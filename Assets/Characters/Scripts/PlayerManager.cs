@@ -42,7 +42,7 @@ public class PlayerManager : MonoBehaviour {
     }
     private void FixedUpdate()
     {
-        if (controllers.Where(c => c.playerNumber > 0).ToArray().Length == 1)
+        if (GetCurrentControllers().Length == 1)
         {
             if (Input.GetButtonDown("Switch"))
             {
@@ -80,7 +80,7 @@ public class PlayerManager : MonoBehaviour {
 
     private PlayerController2[] GetCurrentControllers()
     {
-        return controllers.Where(c => c.playerNumber == 1).ToArray();
+        return controllers.Where(c => c.playerNumber > 0).ToArray();
     }
     private PlayerController2 GetFirstController()
     {
