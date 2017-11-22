@@ -19,6 +19,8 @@ public class PushBoxNodeData : MonoBehaviour
         float xDifference = previousNode.position.x - transform.position.x;
         float zDifference = previousNode.position.z - transform.position.z;
 
+        Debug.Log(xDifference + ", " + zDifference);
+
         if (Mathf.Abs(xDifference) >= Mathf.Abs(zDifference))
         {
             if (xDifference > 0)

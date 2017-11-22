@@ -11,6 +11,7 @@ public class BoxPush : MonoBehaviour
     public int nodeCount;
     public GameObject nodeMesh;
     public int atNode = 0;
+    public float betweenNode = 0.0f;
     [HideInInspector]
     public bool pushingNorth = false, pushingEast = false, pushingSouth = false, pushingWest = false;
 
@@ -152,12 +153,34 @@ public class BoxPush : MonoBehaviour
     {
         for (int x = 1; x < nodesInWorld.Count; x++)
         {
-            nodesInWorld[x].gameObject.GetComponent<PushBoxNodeData>().SuggestPushes(nodesInWorld[0].gameObject.transform);
+            nodesInWorld[x].gameObject.GetComponent<PushBoxNodeData>().SuggestPushes(nodesInWorld[(x-1)].gameObject.transform);
             Debug.Log("node" + x + " handled");
         }
+
+        nodesInWorld[0].gameObject.GetComponent<PushBoxNodeData>().sideToPushAway = nodesInWorld[1].gameObject.GetComponent<PushBoxNodeData>().sideToPushAway;
+        nodesInWorld[0].gameObject.GetComponent<PushBoxNodeData>().sideToPushTo = nodesInWorld[1].gameObject.GetComponent<PushBoxNodeData>().sideToPushTo;
+
     }
 
     public void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.tag == "BoxNode")
+        {
+            transform.position = collision.gameObject.transform.position;
+
+            for (int node = 0; node < nodesInWorld.Count; node++)
+            {
+                if (collision.gameObject == nodesInWorld[node])
+                {
+                    atNode = node;
+                    betweenNode = 0.0f;
+                    break;
+                }
+            }
+        }
+    }
+
+    public void OnCollisionStay(Collision collision)
     {
         if (collision.collider.tag == "Player")
         {
@@ -182,17 +205,27 @@ public class BoxPush : MonoBehaviour
                 pushingNorth = true;
                 pushingSouth = false;
             }
-        }
-
-        if (collision.collider.tag == "BoxNode")
-        {
-            transform.position = collision.gameObject.transform.position;
             
-            //set box position to the boxnodes position, at node = boxNode index
+            if ((nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushTo == PushBoxNodeData.collisionSide.North && pushingNorth)||
+                (nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushTo == PushBoxNodeData.collisionSide.East && pushingEast)||
+                (nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushTo == PushBoxNodeData.collisionSide.South && pushingSouth)||
+                (nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushTo == PushBoxNodeData.collisionSide.West && pushingWest))
+            {
+                betweenNode += 0.05f;
+            }
+            else if ((nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushAway == PushBoxNodeData.collisionSide.North && pushingNorth) ||
+                    (nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushAway == PushBoxNodeData.collisionSide.East && pushingEast) ||
+                    (nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushAway == PushBoxNodeData.collisionSide.South && pushingSouth) ||
+                    (nodesInWorld[atNode + 1].gameObject.GetComponent<PushBoxNodeData>().sideToPushAway == PushBoxNodeData.collisionSide.West && pushingWest))
+                    {
+                        betweenNode -= 0.05f;
+                    }
+
+            transform.position = Vector3.Lerp(nodesInWorld[atNode - 1].gameObject.transform.position, nodesInWorld[atNode].gameObject.transform.position, betweenNode);
         }
     }
 
-    public void OnCollisionExit(Collision collision)
+        public void OnCollisionExit(Collision collision)
     {
         if (collision.collider.tag == "Player")
         {
