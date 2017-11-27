@@ -16,7 +16,7 @@ public class Knife : MonoBehaviour {
     [SerializeField]
     private float m_ChopDownSpeedConst = 5f;
 
-    [Header("Delays")]
+    [Header("Knife Delays")]
     [SerializeField]
     private float m_ChopDelay = 1f;
     [SerializeField]

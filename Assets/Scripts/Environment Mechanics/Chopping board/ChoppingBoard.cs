@@ -10,7 +10,7 @@ public class ChoppingBoard : MonoBehaviour {
     [SerializeField]
     private Knife knifeObjectPrefab;
 
-    [Header("Delays")]
+    [Header("State Delays")]
     [SerializeField]
     private float m_upDelay = 0f;
     [SerializeField]
@@ -19,6 +19,9 @@ public class ChoppingBoard : MonoBehaviour {
     private float m_downDelay = 0f;
     [SerializeField]
     private float m_choppedDelay = 0f;
+
+    [SerializeField]
+    private bool m_WaitForKnives = true;
 
     private Transform m_KnifeHolder;
     public Transform KnifeHolder
@@ -52,6 +55,7 @@ public class ChoppingBoard : MonoBehaviour {
     private IEnumerator ChopAllKnives_Coroutine()
     {
         WaitWhile knivesCutting = new WaitWhile(AreknivesCutting);
+
         while (true)
         {
             for (int i = 0; i < knives.Length; i++)
@@ -60,7 +64,8 @@ public class ChoppingBoard : MonoBehaviour {
                 yield return new WaitForSeconds(m_upDelay);
             }
 
-            yield return knivesCutting;
+            if (m_WaitForKnives)
+                yield return knivesCutting;
 
             yield return new WaitForSeconds(m_holdDelay);
 
@@ -70,7 +75,8 @@ public class ChoppingBoard : MonoBehaviour {
                 yield return new WaitForSeconds(m_downDelay);
             }
 
-            yield return knivesCutting;
+            if (m_WaitForKnives)
+                yield return knivesCutting;
 
             yield return new WaitForSeconds(m_choppedDelay);
         }

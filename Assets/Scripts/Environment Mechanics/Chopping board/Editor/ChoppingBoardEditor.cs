@@ -9,7 +9,7 @@ public class ChoppingBoardEditor : Editor {
     SerializedProperty
         sp_Knives,
         sp_ChopOnStart,
-        sp_UpDelay, sp_HoldDelay, sp_DownDelay, sp_ChoppedDelay,
+        sp_UpDelay, sp_HoldDelay, sp_DownDelay, sp_ChoppedDelay, sp_WaitForKnives,
         sp_KnifeObjectPrefab;
 
     bool showSettings;
@@ -30,6 +30,7 @@ public class ChoppingBoardEditor : Editor {
         sp_HoldDelay = serializedObject.FindProperty("m_holdDelay");
         sp_DownDelay = serializedObject.FindProperty("m_downDelay");
         sp_ChoppedDelay = serializedObject.FindProperty("m_choppedDelay");
+        sp_WaitForKnives = serializedObject.FindProperty("m_WaitForKnives");
 
         sp_KnifeObjectPrefab = serializedObject.FindProperty("knifeObjectPrefab");
     }
@@ -64,6 +65,8 @@ public class ChoppingBoardEditor : Editor {
             EditorGUILayout.PropertyField(sp_HoldDelay);
             EditorGUILayout.PropertyField(sp_DownDelay);
             EditorGUILayout.PropertyField(sp_ChoppedDelay);
+
+            EditorGUILayout.PropertyField(sp_WaitForKnives);
 
             EditorGUILayout.ObjectField(sp_KnifeObjectPrefab);
         }
