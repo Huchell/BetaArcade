@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(CharacterController), typeof(PlayerCameraSettings))]
 public class PlayerController2 : MonoBehaviour {
 
     public float walkSpeed = 2;
     public float runSpeed = 6;
     public float gravity = -12;
     public float jumpHeight = 1;
-    public float m_InAirControlMultiplier = 1;
     public float chargeValue = 0;
-    public float m_ChargeJumpMultiplier = 1;
 
     public float turnSmoothTime = 0.1f;
     float turnSmoothVelocity;
@@ -19,19 +18,15 @@ public class PlayerController2 : MonoBehaviour {
     float speedSmoothVelocity;
     float currentSpeed;
     float velocityY;
-    bool isDJump;
     bool isCharge = false;
-    bool isChargeJump = false;
     bool canMove = true;
-
-    private float currentWalkSpeed;
 
     public int playerNumber = 0;
     public PlayerType characterType;
 
-    Transform cameraT;
-    CharacterController controller;
-    Animator animator;
+    protected Transform cameraT;
+    protected CharacterController controller;
+    protected Animator animator;
 
     [HideInInspector]
     private PlayerCameraSettings m_CameraSettings;
@@ -48,11 +43,15 @@ public class PlayerController2 : MonoBehaviour {
         }
     }
 
+    private bool groundedPrevFrame = false;
+
 	// Use this for initialization
 	void Start () {
         controller = GetComponent<CharacterController>();
         cameraT = CameraSettings.CameraReference.transform;
         animator = GetComponent<Animator>();
+
+        groundedPrevFrame = controller.isGrounded;
     }
 
     // Update is called once per frame
@@ -63,21 +62,7 @@ public class PlayerController2 : MonoBehaviour {
             Vector2 input = new Vector2(Input.GetAxisRaw(GetInputString("Horizontal")), Input.GetAxisRaw(GetInputString("Vertical")));
             Vector2 inputDir = input.normalized;
 
-            if (canMove)
-            {
-                //bool running = Input.GetButton("Sprint");
-                bool running = Mathf.Abs(Input.GetAxis(GetInputString("Sprint"))) > 0;
-                float targetSpeed = ((running) ? runSpeed : walkSpeed) * 
-                    (controller.isGrounded ? 1 : 
-                        isChargeJump ? m_ChargeJumpMultiplier : m_InAirControlMultiplier) * 
-                    inputDir.magnitude;
-
-                currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
-            }
-            else
-            {
-                currentSpeed = 0;
-            }
+            currentSpeed = GetCurrentSpeed(inputDir);
 
             if (inputDir != Vector2.zero) //stops 0/0 errors
             {
@@ -87,39 +72,34 @@ public class PlayerController2 : MonoBehaviour {
 
             if (Input.GetButtonDown(GetInputString("Jump")))
             {
-                Jump();
+                Jump(jumpHeight);
             }
 
-            if (Input.GetButtonDown(GetInputString("Charge Jump")))
+            if (controller.isGrounded)
             {
-                canMove = false;
-                isCharge = true;
-            }
-
-            if (isCharge)
-            {
-                chargeValue++;
-            }
-
-            if (Input.GetButtonUp(GetInputString("Charge Jump")))
-            {
-                isDJump = true;
-                isChargeJump = true;
-
-                if (chargeValue > 20 && chargeValue < 60)
+                #region Charge
+                if (Input.GetButtonDown(GetInputString("Charge Jump")))
                 {
-                    jumpHeight = 2;
-                    Jump();
+                    canMove = false;
+                    isCharge = true;
                 }
-                else if (chargeValue > 60)
+
+                if (isCharge)
                 {
-                    jumpHeight = 4;
-                    Jump();
+                    chargeValue++;
                 }
-                jumpHeight = 1;
-                isCharge = false;
-                chargeValue = 0;
-                canMove = true;
+
+                if (Input.GetButtonUp(GetInputString("Charge Jump")))
+                {
+                    OnChargedAction();
+
+                    // Reset Charge variables 
+                    // and make it so the player can move again
+                    chargeValue = 0;
+                    isCharge = false;
+                    canMove = true;
+                }
+                #endregion
             }
         }
         else
@@ -128,37 +108,70 @@ public class PlayerController2 : MonoBehaviour {
                 currentSpeed = 0;
         }
 
+        // Apply Gravity
         velocityY += Time.deltaTime * gravity;
+
+        // Workout velocity
         Vector3 velocity = transform.forward * currentSpeed + Vector3.up * velocityY;
 
+        // Move the player
         controller.Move(velocity * Time.deltaTime);
         currentSpeed = new Vector2(controller.velocity.x, controller.velocity.z).magnitude;
 
-        if(controller.isGrounded)
+        // Check to see if the controller has just been grounded
+        if(controller.isGrounded && !groundedPrevFrame)
         {
-            isDJump = false;
-            isChargeJump = false;
-            velocityY = 0;
+            OnGrounded();
         }
 
         UpdateAnimations();
-    }
-    void Jump()
-    {
-        if(controller.isGrounded)
-        {
-            float jumpVelocity = Mathf.Sqrt(-2 * gravity * jumpHeight); //Jump equation
-            velocityY = jumpVelocity;
-        }
-        if (!controller.isGrounded && !isDJump)
-        {
-            isDJump = true;
-            float jumpVelocity = Mathf.Sqrt(-2 * gravity * jumpHeight);
-            velocityY = jumpVelocity;
-        }
+
+        // Set groundedPrevFrame to isGrounded at the end of 
+        // everything to get ready for the next frame
+        groundedPrevFrame = controller.isGrounded;
     }
 
-    void UpdateAnimations()
+    #region Methods
+
+    #region Move
+    protected virtual float GetCurrentSpeed(Vector3 direction)
+    {
+        // If the player can move, work out the current speed
+        if (canMove)
+        {
+            bool running = Mathf.Abs(Input.GetAxis(GetInputString("Sprint"))) > 0;
+            float targetSpeed = ((running) ? runSpeed : walkSpeed) * direction.magnitude;
+
+            return Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
+        }
+
+        // else set the speed to 0
+        return 0;
+    }
+    #endregion
+    #region Jump
+    protected void Jump(float height)
+    {
+        if(CanJumpCheck())
+        {
+            float jumpVelocity = Mathf.Sqrt(-2 * gravity * height); //Jump equation
+            velocityY = jumpVelocity;
+        }
+    }
+    protected virtual bool CanJumpCheck()
+    {
+        return controller.isGrounded;
+    }
+    protected virtual void OnGrounded()
+    {
+        isCharge = false;
+        velocityY = 0;
+    }
+    #endregion
+    #region Charge
+    protected virtual void OnChargedAction() { throw new System.NotImplementedException(); }
+    #endregion
+    protected virtual void UpdateAnimations()
     {
         if (animator && animator.runtimeAnimatorController != null)
         {
@@ -171,13 +184,11 @@ public class PlayerController2 : MonoBehaviour {
         }
     }
 
+    #region Util
     public string GetInputString(string input)
     {
         return input + "_" + playerNumber;
     }
-
-    void OnControllerColliderHit(ControllerColliderHit hit)
-    {
-        
-    }
+    #endregion
+    #endregion
 }

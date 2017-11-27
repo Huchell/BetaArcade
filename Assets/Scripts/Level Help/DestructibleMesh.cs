@@ -27,14 +27,6 @@ public class DestructibleMesh : MonoBehaviour {
 
         Destroy(gameObject);
     }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            DestructObject(collision.impulse.magnitude * 100, collision.contacts[0].point, 10);
-        }
-    }
 }
 
 #if UNITY_EDITOR
