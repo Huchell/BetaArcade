@@ -37,7 +37,7 @@ public class platform_Oscillate_Editor : Editor
 		float lerpZ = (1 - platform.offset) * platform.startPosition.transform.position.z + (platform.offset) * platform.endPosition.transform.position.z;
 		lerpPosition = new Vector3 (lerpX, lerpY, lerpZ);
 
-		solidPlatform.transform.SetPositionAndRotation (lerpPosition, Quaternion.identity);
+		solidPlatform.transform.SetPositionAndRotation (lerpPosition, solidPlatform.transform.rotation);
 
 		if (platform.offset < 0.05 && !platform.AlwaysShowGhosts)
 		{
