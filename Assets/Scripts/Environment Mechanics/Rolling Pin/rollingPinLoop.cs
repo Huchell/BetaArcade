@@ -18,7 +18,9 @@ public class rollingPinLoop : MonoBehaviour {
 		startLocation = transform.position;
 		startRotation = transform.rotation;
 		InitialImpulse ();
-	}
+        hitTarget.GetComponent<MeshRenderer>().enabled = false;
+        endTarget.GetComponent<MeshRenderer>().enabled = false;
+    }
 		
 	public void InitialImpulse()
 	{
@@ -27,7 +29,7 @@ public class rollingPinLoop : MonoBehaviour {
 		rb.AddForce (InitialForce, ForceMode.VelocityChange);
 	}
     
-	void OnCollisionEnter (Collision col)
+	void OnTriggerEnter (Collider col)
 	{
 		if (col.gameObject == hitTarget)
 		{
