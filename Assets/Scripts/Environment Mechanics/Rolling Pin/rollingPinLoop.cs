@@ -9,6 +9,7 @@ public class rollingPinLoop : MonoBehaviour {
 	Vector3 startLocation;
 	Quaternion startRotation;
 	public GameObject hitTarget, endTarget;
+    public Vector3 InitialForce = new Vector3(1f, -2f, 0f), GroundVelocityBoost = new Vector3(2f, 0f, 0f);
 
 	// Use this for initialization
 	void Start ()
@@ -23,14 +24,14 @@ public class rollingPinLoop : MonoBehaviour {
 	{
 		rb.velocity = Vector3.zero;
 		rb.rotation = startRotation;
-		rb.AddForce (1f, -2f, 0f, ForceMode.VelocityChange);
+		rb.AddForce (InitialForce, ForceMode.VelocityChange);
 	}
-
+    
 	void OnCollisionEnter (Collision col)
 	{
 		if (col.gameObject == hitTarget)
 		{
-			rb.AddForce (2f, 0f, 0f, ForceMode.VelocityChange);
+			rb.AddForce (GroundVelocityBoost, ForceMode.VelocityChange);
 		}
 
 		if (col.gameObject == endTarget)
