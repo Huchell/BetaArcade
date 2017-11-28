@@ -5,10 +5,6 @@ using UnityEngine;
 public class CameraPan : MonoBehaviour {
     public Transform[] target;
     public float speed;
-    public Transform currentTarget;
-    public Transform nextTarget;
-    private float lerpBetween = 0;
-
     private int current;
 
 	void FixedUpdate ()
@@ -22,23 +18,5 @@ public class CameraPan : MonoBehaviour {
         {
             current = (current + 1) % target.Length;
         }
-
-        Vector3 pos = currentTarget.position;
-
-        if (nextTarget != null)
-        {
-            if (lerpBetween >= 1)
-            {
-                currentTarget = nextTarget;
-                nextTarget = null;
-                lerpBetween = 0;
-            }
-            else
-            {
-                lerpBetween += Time.deltaTime * 5;
-                pos = Vector3.Lerp(pos, nextTarget.position, lerpBetween);
-            }
-        }
-        transform.LookAt(pos);
     }
 }
