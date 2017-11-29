@@ -182,7 +182,7 @@ public class BoxPush : MonoBehaviour
 
     public void OnCollisionStay(Collision collision)
     {
-        if (collision.collider.tag == "Player")
+        if (collision.collider.GetComponent<CharacterController>() != null)
         {
             if (collision.gameObject.transform.position.x > transform.position.x)
             {
@@ -222,6 +222,15 @@ public class BoxPush : MonoBehaviour
                     }
 
             transform.position = Vector3.Lerp(nodesInWorld[atNode - 1].gameObject.transform.position, nodesInWorld[atNode].gameObject.transform.position, betweenNode);
+
+            if (betweenNode < 0)
+            {
+                if (atNode != 0)
+                {
+                    betweenNode = 1 + betweenNode;
+                    atNode -= 1;
+                }
+            }
         }
     }
 
