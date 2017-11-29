@@ -6,72 +6,97 @@ using UnityEngine;
 public class PlayerManager : MonoBehaviour {
 
     // Singleton
-
-    private PlayerController[] m_playerControllers;
-
-    public int NumberOfPlayerControllers
+    private static PlayerManager instance;
+    public static PlayerManager Instance
     {
         get
         {
-            return m_playerControllers.Length;
+            if (instance == null)
+            {
+                GameObject pm = new GameObject("Player Manager");
+                pm.AddComponent<PlayerManager>();
+            }
+
+            return instance;
         }
     }
 
-    public int NumberOfControlledPlayerControllers
+    private void Awake()
     {
-        get
-        {
-            return m_playerControllers.Where(pc => pc.playerNumber >= 0).ToArray().Length;
-        }
+        if (instance == null)
+            instance = this;
+        else if (instance != this)
+            Destroy(gameObject);
     }
+    private void OnDestroy()
+    {
+        if (instance == this)
+            instance = null;
+    }
+
+    private PlayerController2[] controllers;
 
     private void Start()
     {
-        m_playerControllers = FindObjectsOfType<PlayerController>();
+        controllers = FindObjectsOfType<PlayerController2>();
     }
     private void FixedUpdate()
     {
-        if (NumberOfControlledPlayerControllers == 1)
+        if (GetCurrentControllers().Length == 1)
         {
-            // 1 Player Stuff
-            if (Input.GetKeyDown(KeyCode.P))
+            if (Input.GetButtonDown("Switch"))
             {
-                int index = FindCurrentPlayer();
+                int index = GetCurrentControllerIndex();
 
-                if (index < 0)
-                    return;
+                SwitchPlayer(controllers[index], controllers[(int)Mathf.Repeat(index + 1, controllers.Length)]);
+            }
 
-                m_playerControllers[index].playerNumber = -1;
-
-                int newIndex = (int)Mathf.Repeat(index + 1, NumberOfPlayerControllers);
-
-                m_playerControllers[newIndex].playerNumber = 0;
+            if (Input.GetButtonDown("Jump_2"))
+            {
+                InitializePlayer();
             }
         }
     }
 
-    private int FindCurrentPlayer()
+    private void InitializePlayer()
     {
-        for (int i = 0; i  < NumberOfPlayerControllers; i++)
-        {
-            if (m_playerControllers[i].playerNumber >= 0)
-            {
-                return i;
-            }
-        }
+        int index = (int)Mathf.Repeat(GetCurrentControllerIndex() + 1, controllers.Length);
 
-        return -1;
+        if (controllers[index].playerNumber == 0)
+        {
+            controllers[index].playerNumber = 2;
+            controllers[index].CameraSettings.CameraReference.SetActive(true);
+
+            SplitScreen();
+        }
     }
 
-    public void AddPlayer(PlayerController controller)
+    void SplitScreen()
     {
-        if (!m_playerControllers.Contains(controller))
-        {
-            PlayerController[] newArray = new PlayerController[m_playerControllers.Length + 1];
-            newArray.Intersect(m_playerControllers);
-            newArray[newArray.Length - 1] = controller;
+        PlayerController2[] conts = GetCurrentControllers();
 
-            m_playerControllers = newArray;
-        }
+        conts[0].CameraSettings.CameraReference.GetComponent<Camera>().rect = new Rect(0, 0, 0.5f, 1);
+        conts[1].CameraSettings.CameraReference.GetComponent<Camera>().rect = new Rect(0.5f, 0, 0.5f, 1);
+    }
+    private void SwitchPlayer(PlayerController2 oldController, PlayerController2 newController)
+    {
+        oldController.CameraSettings.CameraReference.SetActive(false);
+        newController.CameraSettings.CameraReference.SetActive(true);
+
+        oldController.playerNumber = 0;
+        newController.playerNumber = 1;
+    }
+
+    private PlayerController2[] GetCurrentControllers()
+    {
+        return controllers.Where(c => c.playerNumber > 0).ToArray();
+    }
+    private PlayerController2 GetFirstController()
+    {
+        return GetCurrentControllers()[0];
+    }
+    private int GetCurrentControllerIndex()
+    {
+        return System.Array.FindIndex(controllers, c => c == GetFirstController());
     }
 }

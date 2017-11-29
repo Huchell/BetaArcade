@@ -17,14 +17,15 @@ public class PlayerController : MonoBehaviour
     private bool IsSprint = false;
     public bool Charging = false;
     public LayerMask groundLayers;
-    public float RotationSpeed;
-    /*public Camera Camera1;
-    public Camera Camera2;
-    public GameObject Player1;
-    public GameObject Player2;
-    public bool Camera1On = true;
-    public bool Camera2On = false;*/
+    public float RotationSpeed = 250f;
     public bool CanJump = true;
+    public int flipHorizontal = 1;
+
+    private bool m_isMoving = false;
+    public bool isMoving
+    {
+        get { return m_isMoving; }
+    }
 
     [SerializeField]
     private int m_playerNumber = -1;
@@ -49,7 +50,6 @@ public class PlayerController : MonoBehaviour
                 CanMove = true;
                 CanJump = true;
                 camera.gameObject.SetActive(true);
-                camera.targetDisplay = m_playerNumber;
             }
         }
     }
@@ -62,8 +62,9 @@ public class PlayerController : MonoBehaviour
     #region Component References
     private Rigidbody rb;
     private CapsuleCollider m_CapsuleCollider;
-    new private Camera camera;
+    [HideInInspector]new public Camera camera;
     private Transform cameraArm;
+    private Animator m_Animator;
     #endregion
 
     #endregion
@@ -89,9 +90,14 @@ public class PlayerController : MonoBehaviour
         {
             if (transform.position != m_prevPosition)
             {
-				m_GroundRay = new Ray(transform.position + m_CapsuleCollider.center, Vector3.down);
+				m_GroundRay = new Ray(transform.position + new Vector3(
+                    m_CapsuleCollider.center.x * transform.lossyScale.x,
+                    m_CapsuleCollider.center.y * transform.lossyScale.y,
+                    m_CapsuleCollider.center.z * transform.lossyScale.z),
+                    Vector3.down
+                    );
 
-				Debug.DrawRay (m_GroundRay.origin, m_GroundRay.direction, Color.white, m_CapsuleCollider.height / 2);
+				Debug.DrawRay (m_GroundRay.origin, m_GroundRay.direction, Color.white, 1f);
                 m_prevPosition = transform.position;
             }
 
@@ -119,6 +125,7 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// Used to cache the isGrounded check
     /// </summary>
+    [ReadOnly] [SerializeField]
     private bool m_isGrounded;
     /// <summary>
     /// Property finds out if the player is grounded
@@ -135,7 +142,7 @@ public class PlayerController : MonoBehaviour
                 m_lastGroundCheckTime = Time.time;
 
                 // Perform the grounded raycast
-                m_isGrounded = (Physics.Raycast(GroundRay, out m_groundHit, (m_CapsuleCollider.height / 2), groundLayers.value));
+                m_isGrounded = (Physics.Raycast(GroundRay, out m_groundHit, ((m_CapsuleCollider.height * transform.lossyScale.y) / 2) +0.1f, groundLayers.value));
             }
 
             // If you are grounded, then reset the double jump
@@ -143,6 +150,7 @@ public class PlayerController : MonoBehaviour
             {
                 JumpTwo = false;
                 rb.velocity = Vector3.zero;
+                m_Animator.SetBool("isJumping", false);
             }
 
             m_groundedLastFrame = m_isGrounded;
@@ -163,6 +171,8 @@ public class PlayerController : MonoBehaviour
         cameraArm = transform.Find("CameraArm");
         camera = cameraArm.GetComponentInChildren<Camera>();
 
+        m_Animator = GetComponentInChildren<Animator>();
+
         if (playerNumber < 0)
         {
             CanMove = false;
@@ -174,48 +184,14 @@ public class PlayerController : MonoBehaviour
             CanMove = true;
             CanJump = true;
             camera.gameObject.SetActive(true);
-            camera.targetDisplay = m_playerNumber;
+            camera.targetDisplay = playerNumber;
         }
-
-        /*Player1.GetComponent<PlayerController>().CanMove = true;
-        Player2.GetComponent<PlayerController>().CanMove = false;
-        Player1.GetComponent<PlayerController>().CanJump = true;
-        Player2.GetComponent<PlayerController>().CanJump = false;*/
 
         //transform.position = SaveBox.Load();
     }
 
     void FixedUpdate()
 	{
-        /*if (Camera1On)
-        {
-            if (Input.GetKeyUp(KeyCode.P))
-            {
-                Camera1.enabled = false;
-                Camera1On = false;
-                Camera2.enabled = true;
-                Camera2On = true;
-                Player2.GetComponent<PlayerController>().CanMove = true;
-                Player1.GetComponent<PlayerController>().CanMove = false;
-                Player2.GetComponent<PlayerController>().CanJump = true;
-                Player1.GetComponent<PlayerController>().CanJump = false;
-            }
-        }
-        else
-        {
-            if (Input.GetKeyUp(KeyCode.P))
-            {
-                Camera1.enabled = true;
-                Camera1On = true;
-                Camera2.enabled = false;
-                Camera2On = false;
-                Player1.GetComponent<PlayerController>().CanMove = true;
-                Player2.GetComponent<PlayerController>().CanMove = false;
-                Player1.GetComponent<PlayerController>().CanJump = true;
-                Player2.GetComponent<PlayerController>().CanJump = false;
-            }
-        }*/
-
         // If the player can move, move them
         if (CanMove)
         {
@@ -226,13 +202,14 @@ public class PlayerController : MonoBehaviour
 
             if (MouseDeltaX != 0)
             {
-                Quaternion rotationDelta = transform.rotation;
-                Vector3 eulerRotationDelta = rotationDelta.eulerAngles;
-
-                eulerRotationDelta.y += MouseDeltaX * Time.deltaTime * RotationSpeed;
-
-                rotationDelta.eulerAngles = eulerRotationDelta;
-                transform.rotation = rotationDelta;
+                /*if (isMoving)
+                {
+                    transform.Rotate(Vector3.up, MouseDeltaX * Time.deltaTime * RotationSpeed * flipHorizontal, Space.Self);
+                }
+                else
+                {*/
+                    cameraArm.transform.Rotate(Vector3.up, MouseDeltaX * Time.deltaTime * RotationSpeed * flipHorizontal, Space.World);
+                //}
             }
 
             // Vertical Camera Rotation
@@ -296,18 +273,6 @@ public class PlayerController : MonoBehaviour
         {
             JumpStrength = JumpStrength + 1;
         }
-
-        //stops the player charging a jump in the air
-        /*if (Charging && !isGrounded)
-        {
-            Charging = false;
-        }*/
-
-        // Taken out and placed in the Input.GetButtonUp if statement above
-        /*if (isGrounded)
-        {
-            JumpTwo = false;
-        }*/
 	}
 
     public void OnDamage(int dmg)
@@ -349,11 +314,21 @@ public class PlayerController : MonoBehaviour
     #region Movement
     void ApplyMovement()
     {
-        float x = Input.GetAxisRaw(GetInputStringFromPlayer("Horizontal")) * Speed * Time.deltaTime;
+        float x_axis = Input.GetAxis(GetInputStringFromPlayer("Horizontal")), z_axis = Input.GetAxis(GetInputStringFromPlayer("Vertical"));
+        
+        float x = x_axis * Speed * Time.deltaTime;
 
-        float z = Input.GetAxisRaw(GetInputStringFromPlayer("Vertical")) * Speed * Time.deltaTime;
+        float z = z_axis * Speed * Time.deltaTime;
 
-        transform.Translate(x, 0, z);
+        //transform.Translate(x, 0, z);
+        rb.MovePosition(rb.position + transform.TransformVector(new Vector3(x, 0, z)));
+
+        m_isMoving = (x != 0 || z != 0);
+
+        //m_Animator.applyRootMotion = !isMoving;
+
+        m_Animator.SetFloat("Z_Axis", z_axis);
+        m_Animator.SetBool("isMoving", isMoving);
     }
 
     #region Jump Methods
@@ -416,6 +391,8 @@ public class PlayerController : MonoBehaviour
         rb.velocity = velo;
 
         rb.AddForce(Vector3.up * strength, ForceMode.Impulse);
+
+        m_Animator.SetBool("isJumping", true);
     }
 
     private void ChargeJump(float strength)
