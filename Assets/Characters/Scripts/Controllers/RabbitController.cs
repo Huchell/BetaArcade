@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("Player Controllers/Rabbit")]
 public class RabbitController : PlayerController2 {
 
     private bool isDJump = false;
@@ -15,7 +16,7 @@ public class RabbitController : PlayerController2 {
         strongJumpHeight = 4,
         chargeJumpAirControl = 1;
 
-    protected override float GetCurrentSpeed(Vector3 direction)
+    protected override float GetCurrentSpeed(Vector2 direction)
     {
         float speed = base.GetCurrentSpeed(direction);
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[AddComponentMenu("")]
 [RequireComponent(typeof(CharacterController), typeof(PlayerCameraSettings))]
 public class PlayerController2 : MonoBehaviour {
 
@@ -66,7 +67,7 @@ public class PlayerController2 : MonoBehaviour {
 
             if (inputDir != Vector2.zero) //stops 0/0 errors
             {
-                float targetRot = Mathf.Atan2(inputDir.x, inputDir.y) * Mathf.Rad2Deg + cameraT.eulerAngles.y;
+                float targetRot = Mathf.Atan2(inputDir.x, inputDir.y) * GetRotationDamp() * Mathf.Rad2Deg + cameraT.eulerAngles.y;
                 transform.eulerAngles = Vector3.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRot, ref turnSmoothVelocity, turnSmoothTime); //Character rotation
             }
 
@@ -134,7 +135,7 @@ public class PlayerController2 : MonoBehaviour {
     #region Methods
 
     #region Move
-    protected virtual float GetCurrentSpeed(Vector3 direction)
+    protected virtual float GetCurrentSpeed(Vector2 direction)
     {
         // If the player can move, work out the current speed
         if (canMove)
@@ -147,6 +148,10 @@ public class PlayerController2 : MonoBehaviour {
 
         // else set the speed to 0
         return 0;
+    }
+    protected virtual float GetRotationDamp()
+    {
+        return 1;
     }
     #endregion
     #region Jump
