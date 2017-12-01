@@ -18,6 +18,8 @@ public class platform_Oscillate : MonoBehaviour
 
 	public PhysicMaterial phyMaterial;
 
+    public bool isActive = true;
+
 	[HideInInspector]
 	public GameObject startPosition, endPosition, platform;
 
@@ -35,27 +37,35 @@ public class platform_Oscillate : MonoBehaviour
 		startPosition.GetComponent<MeshRenderer> ().enabled = false;
 		endPosition.GetComponent<MeshRenderer> ().enabled = false;
 	}
-	
-	// Update is called once per frame
-	void Update ()
-	{
-		timer += Time.deltaTime;
-		float stdTime = timer * (speed / (Vector3.Distance(startPosition.transform.position, endPosition.transform.position)));
-		float offsetSync = stdTime + ((((offset * 2f) - 1f) * Mathf.PI) * 0.5f);
-		float lerpValue = (Mathf.Sin (offsetSync) + 1f)/2f;
-		//Debug.Log (lerpValue);
-		lerpValue = Mathf.Clamp(((lerpValue * (1.0f+(2*waitRatio))) - waitRatio), 0.0f, 1.0f); //this is to add more 'stop' at the edges
 
-		float lerpX = ((1 - lerpValue) * startPosition.transform.position.x) + (lerpValue * endPosition.transform.position.x);
-		float lerpY = ((1 - lerpValue) * startPosition.transform.position.y) + (lerpValue * endPosition.transform.position.y);
-		float lerpZ = ((1 - lerpValue) * startPosition.transform.position.z) + (lerpValue * endPosition.transform.position.z);
-		Vector3 lerpPosition = new Vector3 (lerpX, lerpY, lerpZ);
+    // Update is called once per frame
+    void Update()
+    {
+        if (isActive)
+        {
+            timer += Time.deltaTime;
+            float stdTime = timer * (speed / (Vector3.Distance(startPosition.transform.position, endPosition.transform.position)));
+            float offsetSync = stdTime + ((((offset * 2f) - 1f) * Mathf.PI) * 0.5f);
+            float lerpValue = (Mathf.Sin(offsetSync) + 1f) / 2f;
+            //Debug.Log (lerpValue);
+            lerpValue = Mathf.Clamp(((lerpValue * (1.0f + (2 * waitRatio))) - waitRatio), 0.0f, 1.0f); //this is to add more 'stop' at the edges
 
-		platform.transform.position = lerpPosition;
-		//Debug.Log (lerpPosition);
-	}
+            float lerpX = ((1 - lerpValue) * startPosition.transform.position.x) + (lerpValue * endPosition.transform.position.x);
+            float lerpY = ((1 - lerpValue) * startPosition.transform.position.y) + (lerpValue * endPosition.transform.position.y);
+            float lerpZ = ((1 - lerpValue) * startPosition.transform.position.z) + (lerpValue * endPosition.transform.position.z);
+            Vector3 lerpPosition = new Vector3(lerpX, lerpY, lerpZ);
 
-	public void RefreshPlatforms()
+            platform.transform.position = lerpPosition;
+            //Debug.Log (lerpPosition);
+        }
+    }
+
+    public void ToggleActivity()
+    {
+        isActive = !isActive;
+    }
+
+    public void RefreshPlatforms()
 	{
 		startPosition.GetComponent<MeshFilter> ().mesh = endPosition.GetComponent<MeshFilter> ().mesh = mesh.GetComponent<MeshFilter> ().sharedMesh;
 

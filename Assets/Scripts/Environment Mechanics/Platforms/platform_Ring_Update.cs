@@ -19,7 +19,32 @@ public class platform_Ring_Update : MonoBehaviour {
 
 	private bool update = true;
 
-	public void OnValidate()
+    [Tooltip("Rotations per second. 0.1f means it will take 10 seconds for one full rotation.")]
+    public float RPS = 0.1f;
+    private MeshFilter mf;
+
+    public bool isActive = true;
+
+    public void Start()
+    {
+        mf = GetComponent<MeshFilter>();
+        mf.mesh = null;
+    }
+
+    public void Update()
+    {
+        if (isActive)
+        {
+            transform.RotateAround(transform.position, Vector3.up, 360f * RPS * Time.deltaTime);
+        }
+    }
+
+    public void ToggleActivity()
+    {
+        isActive = !isActive;
+    }
+
+    public void OnValidate()
 	{
 		numberOfPlatforms = Mathf.Clamp (numberOfPlatforms, 0, platformCountCap);
 
