@@ -5,7 +5,8 @@ using UnityEngine;
 [AddComponentMenu("Player Controllers/Rabbit")]
 public class RabbitController : PlayerController2 {
 
-    private bool isDJump = false;
+    //[SerializeField][ReadOnly]
+    //private bool isDJump = false;
     private bool isChargeJumping = false;
 
     [SerializeField]
@@ -27,28 +28,19 @@ public class RabbitController : PlayerController2 {
     protected override bool CanJumpCheck()
     {
         if (!isChargeJumping)
-        if (controller.isGrounded)
-        {
-            return true;
-        }
-        else if (!isDJump)
-        {
-            isDJump = true;
-            return true;
-        }
-
-        return false;
+            return base.CanJumpCheck();
+        else 
+            return false;
     }
+
     protected override void OnChargedAction()
     {
         if (chargeValue > strongChargeThreshold)
         {
-            Debug.Log("Strong");
             Jump(strongJumpHeight);
         }
         else if (chargeValue > weakChargeThreshold)
         {
-            Debug.Log("Weak");
             Jump(weakJumpHeight);
         }
 
@@ -57,7 +49,7 @@ public class RabbitController : PlayerController2 {
     protected override void OnGrounded()
     {
         base.OnGrounded();
-        isDJump = false;
+        //isDJump = false;
         isChargeJumping = false;
     }
 }

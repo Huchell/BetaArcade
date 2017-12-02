@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[AddComponentMenu("Player Controllers/Cat")]
 public class CatController : PlayerController2 {
 
     public bool isCharging;
     private bool chargeInterrupted;
 
     [SerializeField]
-    private float ChargeSpeed = 8, ChargeTime = 1, chargeThreshold = 30, chargeRotationDamp = .7f;
+    private float ChargeSpeed = 8, ChargeTime = 1, chargeThreshold = 30, chargeRotationDamp = .4f;
 
     protected override bool CanJumpCheck()
     {
@@ -35,7 +34,6 @@ public class CatController : PlayerController2 {
     {
         return isCharging ? chargeRotationDamp : base.GetRotationDamp();
     }
-
     IEnumerator Charge()
     {
         float currentChargeTime = 0;
@@ -62,19 +60,10 @@ public class CatController : PlayerController2 {
                 hit.gameObject.GetComponent<DestructibleMesh>().
                     DestructObject(100, hit.gameObject.transform.position, 10);
             }
-            else
+            else if (hit.gameObject.CompareTag("Untagged"))
             {
-                RaycastHit rayHit;
-                if (controller.Raycast(new Ray(transform.position + controller.center, transform.forward), out rayHit, 0.1f))
-                {
-                    if (rayHit.transform.gameObject == hit.gameObject)
-                    {
-                        hit.gameObject.SendMessage("OnChargeHit", hit, SendMessageOptions.DontRequireReceiver);
-
-                        // Hit in front
-                        isCharging = false;
-                    }   
-                }
+                // Hit in front
+                isCharging = false;
             }
         }
     }

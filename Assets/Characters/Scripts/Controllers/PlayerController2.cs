@@ -6,6 +6,19 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController), typeof(PlayerCameraSettings))]
 public class PlayerController2 : MonoBehaviour {
 
+    #region GodMode
+    [SerializeField]
+    private bool GodMode = false;
+    public void SetGodMode(bool value)
+    {
+        GodMode = value;
+    }
+    public void ToggleGodMode()
+    {
+        GodMode = !GodMode;
+    }
+    #endregion
+
     public float walkSpeed = 2;
     public float runSpeed = 6;
     public float gravity = -12;
@@ -18,6 +31,7 @@ public class PlayerController2 : MonoBehaviour {
     public float speedSmoothTime = 0.1f;
     float speedSmoothVelocity;
     float currentSpeed;
+    [SerializeField][ReadOnly]
     float velocityY;
     bool isCharge = false;
     bool canMove = true;
@@ -28,6 +42,10 @@ public class PlayerController2 : MonoBehaviour {
     protected Transform cameraT;
     protected CharacterController controller;
     protected Animator animator;
+
+    #region Animation Variables
+    private bool isJumping = false;
+    #endregion
 
     [HideInInspector]
     private PlayerCameraSettings m_CameraSettings;
@@ -60,6 +78,11 @@ public class PlayerController2 : MonoBehaviour {
 
         if (playerNumber > 0)
         {
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                ToggleGodMode();
+            }
+
             Vector2 input = new Vector2(Input.GetAxisRaw(GetInputString("Horizontal")), Input.GetAxisRaw(GetInputString("Vertical")));
             Vector2 inputDir = input.normalized;
 
@@ -90,15 +113,9 @@ public class PlayerController2 : MonoBehaviour {
                     chargeValue++;
                 }
 
-                if (Input.GetButtonUp(GetInputString("Charge Jump")))
+                if (isCharge && Input.GetButtonUp(GetInputString("Charge Jump")))
                 {
-                    OnChargedAction();
-
-                    // Reset Charge variables 
-                    // and make it so the player can move again
-                    chargeValue = 0;
-                    isCharge = false;
-                    canMove = true;
+                    Charge();
                 }
                 #endregion
             }
@@ -110,7 +127,8 @@ public class PlayerController2 : MonoBehaviour {
         }
 
         // Apply Gravity
-        velocityY += Time.deltaTime * gravity;
+        if (!controller.isGrounded)
+            velocityY += Time.deltaTime * gravity;
 
         // Workout velocity
         Vector3 velocity = transform.forward * currentSpeed + Vector3.up * velocityY;
@@ -157,7 +175,7 @@ public class PlayerController2 : MonoBehaviour {
     #region Jump
     protected void Jump(float height)
     {
-        if(CanJumpCheck())
+        if(GodMode || CanJumpCheck())
         {
             float jumpVelocity = Mathf.Sqrt(-2 * gravity * height); //Jump equation
             velocityY = jumpVelocity;
@@ -169,11 +187,21 @@ public class PlayerController2 : MonoBehaviour {
     }
     protected virtual void OnGrounded()
     {
+        animator.SetBool("isJumping", false);
         isCharge = false;
-        velocityY = 0;
     }
     #endregion
     #region Charge
+    public void Charge()
+    {
+        OnChargedAction();
+
+        // Reset Charge variables 
+        // and make it so the player can move again
+        chargeValue = 0;
+        isCharge = false;
+        canMove = true;
+    }
     protected virtual void OnChargedAction() { throw new System.NotImplementedException(); }
     #endregion
     protected virtual void UpdateAnimations()
@@ -184,8 +212,21 @@ public class PlayerController2 : MonoBehaviour {
             animator.SetBool("isMoving", isMoving);
             if (isMoving)
             {
-                animator.SetFloat("Speed", currentSpeed);
+                //animator.SetFloat("Speed", currentSpeed);
+                animator.SetFloat("Z_Axis", currentSpeed);
             }
+            else
+            {
+                animator.SetFloat("Speed", 0);
+            }
+
+            if (velocityY > 0)
+            {
+                animator.SetBool("isJumping", true);
+            }
+
+            animator.SetBool("isCharging", isCharge);
+            animator.SetFloat("ChargeAmount", chargeValue / 60);
         }
     }
 
