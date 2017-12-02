@@ -20,7 +20,7 @@ public class platform_Standing_Logic : MonoBehaviour {
 		}
 	}
 
-	void OnCollisionExit (Collision other)
+    void OnCollisionExit (Collision other)
 	{
 		if (other.collider.tag == "Player")
 		{

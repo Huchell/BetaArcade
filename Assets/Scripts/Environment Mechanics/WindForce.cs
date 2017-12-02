@@ -33,7 +33,7 @@ public class WindForce : MonoBehaviour
         if (RigidbodiesInWindZoneList.Count > 0)
         {
             foreach (Rigidbody rigid in RigidbodiesInWindZoneList)
-                rigid.AddForce(windDirection * windStrength);
+                if (rigid) rigid.AddForce(windDirection * windStrength);
         }
     }
 }

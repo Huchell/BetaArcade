@@ -1,6 +1,18 @@
 fileFormatVersion: 2
 guid: 321c2c5c228cf50468b8844694fe37e3
+<<<<<<< HEAD
 timeCreated: 1511333428
+=======
+<<<<<<< HEAD
+timeCreated: 1511333428
+=======
+<<<<<<< HEAD
+timeCreated: 1511222568
+=======
+timeCreated: 1511048939
+>>>>>>> origin/Build-0.0.2
+>>>>>>> Build-0.0.2
+>>>>>>> origin/Testing-Player-Controller-Things
 licenseType: Pro
 ShaderImporter:
   defaultTextures: []
