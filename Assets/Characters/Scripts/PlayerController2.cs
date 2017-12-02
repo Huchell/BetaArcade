@@ -25,6 +25,7 @@ public class PlayerController2 : MonoBehaviour {
 
     Transform cameraT;
     CharacterController controller;
+    Animator animator;
 
     [HideInInspector]
     private PlayerCameraSettings m_CameraSettings;
@@ -45,6 +46,7 @@ public class PlayerController2 : MonoBehaviour {
 	void Start () {
         controller = GetComponent<CharacterController>();
         cameraT = CameraSettings.CameraReference.transform;
+        animator = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -52,7 +54,6 @@ public class PlayerController2 : MonoBehaviour {
 
         if (playerNumber > 0)
         {
-
             Vector2 input = new Vector2(Input.GetAxisRaw(GetInputString("Horizontal")), Input.GetAxisRaw(GetInputString("Vertical")));
             Vector2 inputDir = input.normalized;
 
@@ -83,12 +84,12 @@ public class PlayerController2 : MonoBehaviour {
                 isDJump = true;
                 if (chargeValue > 20 && chargeValue < 60)
                 {
-                    jumpHeight = 3;
+                    jumpHeight = 2;
                     Jump();
                 }
                 else if (chargeValue > 60)
                 {
-                    jumpHeight = 5;
+                    jumpHeight = 4;
                     Jump();
                 }
                 jumpHeight = 1;
@@ -105,6 +106,7 @@ public class PlayerController2 : MonoBehaviour {
             //bool running = Input.GetButton("Sprint");
             bool running = Input.GetAxis(GetInputString("Sprint")) > 0;
             float targetSpeed = ((running) ? runSpeed : walkSpeed) * inputDir.magnitude;
+
             currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
 
         }
@@ -134,6 +136,8 @@ public class PlayerController2 : MonoBehaviour {
             walkSpeed = 2;
             runSpeed = 6;
         }
+
+        UpdateAnimations();
     }
     void Jump()
     {
@@ -147,6 +151,19 @@ public class PlayerController2 : MonoBehaviour {
             isDJump = true;
             float jumpVelocity = Mathf.Sqrt(-2 * gravity * jumpHeight);
             velocityY = jumpVelocity;
+        }
+    }
+
+    void UpdateAnimations()
+    {
+        if (animator && animator.runtimeAnimatorController != null)
+        {
+            bool isMoving = currentSpeed > 0;
+            animator.SetBool("isMoving", isMoving);
+            if (isMoving)
+            {
+                animator.SetFloat("Speed", currentSpeed);
+            }
         }
     }
 
