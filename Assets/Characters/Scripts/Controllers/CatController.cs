@@ -7,6 +7,22 @@ public class CatController : PlayerController2 {
 
     public bool isCharging;
     private bool chargeInterrupted;
+    private CatChargeHitbox m_ChargeHitBox;
+
+    public CatChargeHitbox ChargeHitBox
+    {
+        get
+        {
+            if (!m_ChargeHitBox)
+            {
+                m_ChargeHitBox = transform.Find("ChargeHitBox").GetComponent<CatChargeHitbox>();
+            }
+
+            return m_ChargeHitBox;
+        }
+    }
+
+    Coroutine chargeReset;
 
     [SerializeField]
     private float ChargeSpeed = 8, ChargeTime = 1, chargeThreshold = 30, chargeRotationDamp = .4f;
@@ -39,7 +55,9 @@ public class CatController : PlayerController2 {
     {
         float currentChargeTime = 0;
         isCharging = true;
-        
+
+        ChargeHitBox.gameObject.SetActive(true);
+
         while (isCharging)
         {
             if (currentChargeTime > ChargeTime)
@@ -49,20 +67,29 @@ public class CatController : PlayerController2 {
 
             yield return new WaitForSeconds(Time.deltaTime);
         }
+
+        ChargeHitBox.gameObject.SetActive(false);
+
     }
 
     protected override void OnControllerColliderHit(ControllerColliderHit hit)
     {
         base.OnControllerColliderHit(hit);
-
-        if (isCharging)
+        
+        if ((controller.collisionFlags & CollisionFlags.CollidedSides) == CollisionFlags.CollidedSides)
         {
-            if ((controller.collisionFlags & CollisionFlags.CollidedSides) == CollisionFlags.CollidedSides)
-            {
-                // not hitting something on floor
-                hit.gameObject.SendMessage("OnChargeHit", hit, SendMessageOptions.DontRequireReceiver);
-                isCharging = false;
-            }
+            isCharging = false;
         }
+    }
+
+
+    IEnumerator ResetCharge()
+    {
+        yield return null;
+        isCharging = false;
+    }
+    public void IgnoreHit()
+    {
+        if (chargeReset != null) StopCoroutine(chargeReset);
     }
 }

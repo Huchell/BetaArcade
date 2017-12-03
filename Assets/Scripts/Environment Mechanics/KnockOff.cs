@@ -7,7 +7,9 @@ public class KnockOff : MonoBehaviour {
 
     public Rigidbody objectToPushOff;
 
-    [SerializeField] private Vector3 m_objectDestination;
+
+    [SerializeField] private Vector3 force;
+    private Vector3 m_objectDestination;
 
     public Vector3 WorldObjectDestination
     {
@@ -32,9 +34,19 @@ public class KnockOff : MonoBehaviour {
         }
     }
 
-	public void PushObject()
+    private bool knocked;
+    private void Start()
     {
-        objectToPushOff.AddForce(1f, 5f, 0f, ForceMode.Impulse);
+        if (!objectToPushOff) objectToPushOff = GetComponent<Rigidbody>();
+        objectToPushOff.Sleep();
+    }
+    public void PushObject()
+    {
+        if (!knocked)
+        {
+            objectToPushOff.AddForce(force, ForceMode.Impulse);
+            knocked = true;
+        }
     }
 
     private void OnDrawGizmosSelected()

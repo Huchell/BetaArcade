@@ -39,9 +39,7 @@ public class PlayerController2 : MonoBehaviour {
     public bool canCharge = true;
     public bool canJump = true;
 
-
     public int playerNumber = 0;
-    public PlayerType characterType;
 
     protected Transform cameraT;
     protected CharacterController controller;
@@ -66,10 +64,17 @@ public class PlayerController2 : MonoBehaviour {
         }
     }
 
+    public ParticleSystem FootstepParticles;
+    private bool canFootstep = true;
+    [SerializeField]
+    private float footstepCooldown = 0.25f;
+    [SerializeField]
+    private AudioClip FootstepClip;
+
     private bool groundedPrevFrame = false;
 
 	// Use this for initialization
-	void Start () {
+	protected virtual void Start () {
         controller = GetComponent<CharacterController>();
         cameraT = CameraSettings.CameraReference.transform;
         animator = GetComponent<Animator>();
@@ -149,6 +154,14 @@ public class PlayerController2 : MonoBehaviour {
         // Move the player
         controller.Move(velocity * Time.deltaTime);
         currentSpeed = new Vector2(controller.velocity.x, controller.velocity.z).magnitude;
+
+        if (Input.GetAxis(GetInputString("Sprint")) > 0)
+        {
+            if (canFootstep)
+            {
+                StartCoroutine(Footstep());
+            }
+        }
 
         // Check to see if the controller has just been grounded
         if(controller.isGrounded && !groundedPrevFrame)
@@ -253,6 +266,13 @@ public class PlayerController2 : MonoBehaviour {
     public string GetInputString(string input)
     {
         return input + "_" + playerNumber;
+    }
+    IEnumerator Footstep()
+    {
+        canFootstep = false;
+        Instantiate(FootstepParticles, transform.position, transform.rotation);
+        yield return new WaitForSeconds(footstepCooldown);
+        canFootstep = true;
     }
     #endregion
     #endregion

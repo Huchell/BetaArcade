@@ -14,7 +14,6 @@ public class PickUp : MonoBehaviour {
         if (other.gameObject.CompareTag("Player"))
         {
             // Do things
-            Debug.Log("Pick Up");
             gameObject.SetActive(false);
 
             //other.gameObject.SetActive(false);

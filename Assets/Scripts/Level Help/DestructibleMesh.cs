@@ -1,43 +1,49 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 
-[RequireComponent(typeof(Rigidbody))]
 public class DestructibleMesh : MonoBehaviour {
 
-    public Destructible swapObject;
+    [SerializeField]
+    [Tooltip("The force at which the shards will explode from the objects origin. (Default=1)")]
+    private float explosionRadius = 1f;
+    [SerializeField]
+    [Tooltip("The life time of the shards, if less than 0 it doesn't destroy itself (Default=5)")]
+    private float lifeTime = 5f;
 
-    private new Rigidbody rigidbody;
-
-    private void Awake()
+    public float ExplosionRadius
     {
-        rigidbody = GetComponent<Rigidbody>();
+        get
+        {
+            return explosionRadius * Mathf.Max(transform.localScale.x, transform.localScale.y, transform.localScale.z);
+        }
     }
-    public void DestructObject(float amount, Vector3 position, float radius)
+
+    public IEnumerator Start()
     {
-        Destructible newObject = Instantiate(swapObject);
-        newObject.transform.position = transform.position;
-        //newObject.transform.rotation = transform.rotation;
-        newObject.transform.localScale = transform.localScale;
+        yield return null;
 
-        rigidbody.AddExplosionForce(amount, position, radius);
+        Vector3 position = transform.position;
 
-        Destroy(gameObject);
+        Collider[] collisions = Physics.OverlapSphere(position, 1f, LayerMask.GetMask("Destructible Shard")).Where(c => c.transform.parent.parent == transform).ToArray();
+
+        foreach (Collider col in collisions)
+        {
+            if (col.attachedRigidbody)
+            {
+                col.attachedRigidbody.AddExplosionForce(5f, position, ExplosionRadius, 0, ForceMode.Impulse);
+            }
+        }
+
+        if (lifeTime >= 0)
+            Destroy(gameObject, lifeTime);
     }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(transform.position, ExplosionRadius);
+    }
+
+
 }
-
-#if UNITY_EDITOR
-[CustomEditor(typeof(DestructibleMesh))]
-public class DestructibleMeshEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        DrawDefaultInspector();
-
-        if (GUILayout.Button("Destruct")) { (target as DestructibleMesh).DestructObject(10, (target as DestructibleMesh).transform.position, 10); }
-    }
-}
-#endif

@@ -5,12 +5,11 @@ using UnityEngine.Events;
 
 public class OnChargeBehaviour : MonoBehaviour {
 
-    [System.Serializable]
-    public class ChargeCallback : UnityEvent<ControllerColliderHit> { }
-    public ChargeCallback OnCharge;
+    public UnityEvent OnCharge;
 
-    void OnChargeHit(ControllerColliderHit hit)
+    void OnChargeHit(CatController controller)
     {
-        OnCharge.Invoke(hit);
+        Debug.Log("Hit");
+        OnCharge.Invoke();
     }
 }

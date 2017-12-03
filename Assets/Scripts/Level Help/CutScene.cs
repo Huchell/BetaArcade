@@ -35,7 +35,6 @@ public class CutScene : MonoBehaviour {
             CutsceneCamera.enabled = false;
             PlayerManager.Instance.StartAllPlayers();
         }
-        
     }
 
     IEnumerator cutscene()
