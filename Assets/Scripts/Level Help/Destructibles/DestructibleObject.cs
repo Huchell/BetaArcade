@@ -8,21 +8,33 @@ public class DestructibleObject : MonoBehaviour {
     [SerializeField]
     [Tooltip("The magnitude of force that need to be exceeded to destroy this object. (Default=5)")]
     private float DestroyThreshold = 5f;
+    [SerializeField]
+    [Tooltip("The layers that wont count towards destroying the mesh.")]
+    private LayerMask ignoreLayers = 0;
 
     [Header("Destructible Mesh")]
     [SerializeField]
-    [Tooltip("The Prefab of the destructible that will spawn")]
+    [Tooltip("The Destructible that will apear and shatter")]
     private GameObject DestructibleMesh;
     [SerializeField]
-    [Tooltip("The offset postion from the gameObject that the destructible object will spawn (Default=(0,0,0))")]
-    private Vector3 positionOffset;
-    [SerializeField]
-    [Tooltip("The offset rotation from the gameObject that the destructible object will spawn (Default=(0,0,0)")]
-    private Vector3 eulerRotationOffset;
+    [Tooltip("")]
+    private GameObject NormalMesh;
+    [Space]
+    public UnityEngine.Events.UnityEvent OnBroken;
 
     private bool initialized = false;
 
-    IEnumerator Start() { yield return null; initialized = true; }
+    private void Awake()
+    {
+        DestructibleMesh.SetActive(false);
+        NormalMesh.SetActive(true);
+    }
+
+    IEnumerator Start()
+    {
+        yield return null;
+        initialized = true;
+    }
     private void OnChargeHit(CatController controller)
     {
         controller.IgnoreHit();
@@ -42,12 +54,11 @@ public class DestructibleObject : MonoBehaviour {
 
     public void DestroyMesh()
     {
-        GetComponent<BoxCollider>().enabled = false;
+        GetComponent<MeshCollider>().enabled = false;
 
-        GameObject destructibleObject = Instantiate(DestructibleMesh, transform.position + positionOffset, transform.rotation, transform.parent);
-        destructibleObject.transform.eulerAngles += eulerRotationOffset;
-        destructibleObject.transform.localScale = transform.localScale;
+        NormalMesh.SetActive(false);
+        DestructibleMesh.SetActive(true);
 
-        Destroy(gameObject);
+        OnBroken.Invoke();
     }
 }

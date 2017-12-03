@@ -153,15 +153,7 @@ public class PlayerController2 : MonoBehaviour {
 
         // Move the player
         controller.Move(velocity * Time.deltaTime);
-        currentSpeed = new Vector2(controller.velocity.x, controller.velocity.z).magnitude;
-
-        if (Input.GetAxis(GetInputString("Sprint")) > 0)
-        {
-            if (canFootstep)
-            {
-                StartCoroutine(Footstep());
-            }
-        }
+        //currentSpeed = new Vector2(controller.velocity.x, controller.velocity.z).magnitude;
 
         // Check to see if the controller has just been grounded
         if(controller.isGrounded && !groundedPrevFrame)
@@ -199,7 +191,7 @@ public class PlayerController2 : MonoBehaviour {
     }
     #endregion
     #region Jump
-    protected void Jump(float height)
+    public void Jump(float height)
     {
         if(GodMode || CanJumpCheck())
         {
@@ -267,12 +259,12 @@ public class PlayerController2 : MonoBehaviour {
     {
         return input + "_" + playerNumber;
     }
-    IEnumerator Footstep()
+    void Footstep()
     {
-        canFootstep = false;
-        Instantiate(FootstepParticles, transform.position, transform.rotation);
-        yield return new WaitForSeconds(footstepCooldown);
-        canFootstep = true;
+        Transform footstepSpawn = transform.Find("FootstepSpawn");
+        if (!footstepSpawn) footstepSpawn = transform;
+
+        Instantiate(FootstepParticles, footstepSpawn.position, footstepSpawn.rotation);
     }
     #endregion
     #endregion
