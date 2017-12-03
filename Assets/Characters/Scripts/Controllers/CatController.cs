@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,7 +22,7 @@ public class CatController : PlayerController2 {
     protected override void OnChargedAction()
     {
         if (chargeValue >= chargeThreshold)
-            StartCoroutine(Charge());
+            StartCoroutine(ChargeCoroutine());
     }
     protected override float GetCurrentSpeed(Vector2 direction)
     {
@@ -34,7 +35,7 @@ public class CatController : PlayerController2 {
     {
         return isCharging ? chargeRotationDamp : base.GetRotationDamp();
     }
-    IEnumerator Charge()
+    IEnumerator ChargeCoroutine()
     {
         float currentChargeTime = 0;
         isCharging = true;
@@ -50,19 +51,16 @@ public class CatController : PlayerController2 {
         }
     }
 
-    private void OnControllerColliderHit(ControllerColliderHit hit)
+    protected override void OnControllerColliderHit(ControllerColliderHit hit)
     {
+        base.OnControllerColliderHit(hit);
+
         if (isCharging)
         {
-            if (hit.gameObject.CompareTag("Destructible"))
+            if ((controller.collisionFlags & CollisionFlags.CollidedSides) == CollisionFlags.CollidedSides)
             {
-
-                hit.gameObject.GetComponent<DestructibleMesh>().
-                    DestructObject(100, hit.gameObject.transform.position, 10);
-            }
-            else if (hit.gameObject.CompareTag("Untagged"))
-            {
-                // Hit in front
+                // not hitting something on floor
+                hit.gameObject.SendMessage("OnChargeHit", hit, SendMessageOptions.DontRequireReceiver);
                 isCharging = false;
             }
         }

@@ -204,6 +204,12 @@ public class PlayerController2 : MonoBehaviour {
     }
     protected virtual void OnChargedAction() { throw new System.NotImplementedException(); }
     #endregion
+
+    protected virtual void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (controller.collisionFlags == CollisionFlags.Above) { velocityY = 0; }
+    }
+
     protected virtual void UpdateAnimations()
     {
         if (animator && animator.runtimeAnimatorController != null)

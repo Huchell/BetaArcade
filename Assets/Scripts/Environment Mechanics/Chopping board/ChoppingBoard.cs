@@ -56,7 +56,7 @@ public class ChoppingBoard : MonoBehaviour {
         {
             for (int i = 0; i < knives.Length; i++)
             {
-                knives[i].ChopUp();
+                if (knives[i]) knives[i].ChopUp();
                 yield return new WaitForSeconds(m_upDelay);
             }
 
@@ -66,7 +66,7 @@ public class ChoppingBoard : MonoBehaviour {
 
             for (int i = 0; i < knives.Length; i++)
             {
-                knives[i].ChopDown();
+                if (knives[i]) knives[i].ChopDown();
                 yield return new WaitForSeconds(m_downDelay);
             }
 

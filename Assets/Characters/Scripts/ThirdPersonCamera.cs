@@ -5,8 +5,6 @@ using UnityEngine;
 public class ThirdPersonCamera : MonoBehaviour {
 
     public bool lockCursor;
-    public float mouseSensitivityX = 7;
-    public float mouseSensitivityY = 5;
     [HideInInspector]
     public Transform target;
     public PlayerController2 player;
