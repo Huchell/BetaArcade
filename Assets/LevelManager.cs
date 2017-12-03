@@ -10,6 +10,33 @@ using UnityEditor.SceneManagement;
 [ExecuteInEditMode]
 public class LevelManager : MonoBehaviour {
 
+    private static LevelManager instance;
+    public static LevelManager Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = new GameObject("LevelManager").AddComponent<LevelManager>();
+            }
+
+            return instance;
+        }
+    }
+
+    protected virtual void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else if (instance != this)
+            Destroy(gameObject);
+    }
+    protected virtual void OnDestroy()
+    {
+        if (instance == this)
+            instance = null;
+    }
+
     public string[] Scenes;
 
     public void LoadScenes()
