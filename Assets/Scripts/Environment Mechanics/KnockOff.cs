@@ -32,9 +32,9 @@ public class KnockOff : MonoBehaviour {
         }
     }
 
-	void OnChargeHit(ControllerColliderHit hit)
+	public void PushObject()
     {
-        objectToPushOff.AddForce(new Vector3(.1f, .1f), ForceMode.Impulse);
+        objectToPushOff.AddForce(1f, 5f, 0f, ForceMode.Impulse);
     }
 
     private void OnDrawGizmosSelected()

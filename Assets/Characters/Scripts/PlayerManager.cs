@@ -99,4 +99,28 @@ public class PlayerManager : MonoBehaviour {
     {
         return System.Array.FindIndex(controllers, c => c == GetFirstController());
     }
+
+    public void StopAllPlayers()
+    {
+        foreach(PlayerController2 controller in GetCurrentControllers())
+        {
+            controller.canMove = false;
+            controller.canJump = false;
+            controller.canCharge = false;
+
+            controller.CameraSettings.CameraReference.enabled = false;
+        }
+    }
+
+    public void StartAllPlayers()
+    {
+        foreach (PlayerController2 controller in GetCurrentControllers())
+        {
+            controller.canMove = true;
+            controller.canJump = true;
+            controller.canCharge = true;
+
+            controller.CameraSettings.CameraReference.enabled = true;
+        }
+    }
 }

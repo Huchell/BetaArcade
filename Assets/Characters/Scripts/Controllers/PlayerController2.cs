@@ -34,7 +34,11 @@ public class PlayerController2 : MonoBehaviour {
     [SerializeField][ReadOnly]
     float velocityY;
     bool isCharge = false;
-    bool canMove = true;
+
+    public bool canMove = true;
+    public bool canCharge = true;
+    public bool canJump = true;
+
 
     public int playerNumber = 0;
     public PlayerType characterType;
@@ -86,36 +90,45 @@ public class PlayerController2 : MonoBehaviour {
             Vector2 input = new Vector2(Input.GetAxisRaw(GetInputString("Horizontal")), Input.GetAxisRaw(GetInputString("Vertical")));
             Vector2 inputDir = input.normalized;
 
-            currentSpeed = GetCurrentSpeed(inputDir);
-
-            if (inputDir != Vector2.zero) //stops 0/0 errors
+            if (canMove)
             {
-                float targetRot = Mathf.Atan2(inputDir.x, inputDir.y) * GetRotationDamp() * Mathf.Rad2Deg + cameraT.eulerAngles.y;
-                transform.eulerAngles = Vector3.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRot, ref turnSmoothVelocity, turnSmoothTime); //Character rotation
-            }
+                currentSpeed = GetCurrentSpeed(inputDir);
 
-            if (Input.GetButtonDown(GetInputString("Jump")))
+                if (inputDir != Vector2.zero) //stops 0/0 errors
+                {
+                    float targetRot = Mathf.Atan2(inputDir.x, inputDir.y) * GetRotationDamp() * Mathf.Rad2Deg + cameraT.eulerAngles.y;
+                    transform.eulerAngles = Vector3.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRot, ref turnSmoothVelocity, turnSmoothTime); //Character rotation
+                }
+            } else { currentSpeed = 0; }
+
+            if (canJump)
             {
-                Jump(jumpHeight);
+                if (Input.GetButtonDown(GetInputString("Jump")))
+                {
+                    Jump(jumpHeight);
+                }
             }
 
             if (controller.isGrounded)
             {
                 #region Charge
-                if (Input.GetButtonDown(GetInputString("Charge Jump")))
+                if (canCharge)
                 {
-                    canMove = false;
-                    isCharge = true;
-                }
+                    if (Input.GetButtonDown(GetInputString("Charge Jump")))
+                    {
+                        canMove = false;
+                        isCharge = true;
+                    }
 
-                if (isCharge)
-                {
-                    chargeValue++;
-                }
+                    if (isCharge)
+                    {
+                        chargeValue++;
+                    }
 
-                if (isCharge && Input.GetButtonUp(GetInputString("Charge Jump")))
-                {
-                    Charge();
+                    if (isCharge && Input.GetButtonUp(GetInputString("Charge Jump")))
+                    {
+                        Charge();
+                    }
                 }
                 #endregion
             }
