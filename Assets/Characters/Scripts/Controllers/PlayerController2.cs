@@ -36,17 +36,60 @@ public class PlayerController2 : MonoBehaviour {
     bool isCharge = false;
 
     public bool canMove = true;
+    private bool lockSpeed = false;
+
     public bool canCharge = true;
     public bool canJump = true;
 
-    public int playerNumber = 0;
+    private Vector2 moveInput;
+    private Vector2 direction;
+    private bool sprintKeyDown = false;
 
+    public int playerNumber = 0;
+    public bool playerActive = false;
+
+    #region Components
     protected Transform cameraT;
     protected CharacterController controller;
     protected Animator animator;
+    #endregion
 
-    #region Animation Variables
-    private bool isJumping = false;
+    #region Animation Properties
+    private bool isMoving
+    {
+        get
+        {
+            return isWalking || isSprinting;
+        }
+    }
+    private bool isWalking
+    {
+        get
+        {
+            return !isSprinting && moveInput.magnitude > 0;
+        }
+    }
+    private bool isJumping
+    {
+        get
+        {
+            return velocityY > 0;
+        }
+    }
+    private bool isFalling
+    {
+        get
+        {
+            return velocityY < 0 && !controller.isGrounded;
+        }
+    }
+    private bool isSprinting
+    {
+        get
+        {
+            return !isJumping && !isFalling && sprintKeyDown;
+        }
+    }
     #endregion
 
     [HideInInspector]
@@ -85,82 +128,49 @@ public class PlayerController2 : MonoBehaviour {
     // Update is called once per frame
     void Update() {
 
-        if (playerNumber > 0)
+        RefreshMovement();
+
+        if (playerActive)
         {
-            if (Input.GetKeyDown(KeyCode.P))
+            JumpInput();
+            ChargeInput();
+        }
+
+        if (canMove)
+        {
+            if (!lockSpeed) currentSpeed = GetCurrentSpeed(direction);
+
+            if (direction != Vector2.zero) //stops 0/0 errors
             {
-                ToggleGodMode();
-            }
-
-            Vector2 input = new Vector2(Input.GetAxisRaw(GetInputString("Horizontal")), Input.GetAxisRaw(GetInputString("Vertical")));
-            Vector2 inputDir = input.normalized;
-
-            if (canMove)
-            {
-                currentSpeed = GetCurrentSpeed(inputDir);
-
-                if (inputDir != Vector2.zero) //stops 0/0 errors
-                {
-                    float targetRot = Mathf.Atan2(inputDir.x, inputDir.y) * GetRotationDamp() * Mathf.Rad2Deg + cameraT.eulerAngles.y;
-                    transform.eulerAngles = Vector3.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRot, ref turnSmoothVelocity, turnSmoothTime); //Character rotation
-                }
-            } else { currentSpeed = 0; }
-
-            if (canJump)
-            {
-                if (Input.GetButtonDown(GetInputString("Jump")))
-                {
-                    Jump(jumpHeight);
-                }
-            }
-
-            if (controller.isGrounded)
-            {
-                #region Charge
-                if (canCharge)
-                {
-                    if (Input.GetButtonDown(GetInputString("Charge Jump")))
-                    {
-                        canMove = false;
-                        isCharge = true;
-                    }
-
-                    if (isCharge)
-                    {
-                        chargeValue++;
-                    }
-
-                    if (isCharge && Input.GetButtonUp(GetInputString("Charge Jump")))
-                    {
-                        Charge();
-                    }
-                }
-                #endregion
+                float targetRot = Mathf.Atan2(direction.x, direction.y) * GetRotationDamp() * Mathf.Rad2Deg + cameraT.eulerAngles.y;
+                transform.eulerAngles = Vector3.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRot, ref turnSmoothVelocity, turnSmoothTime); //Character rotation
             }
         }
         else
         {
-            if (controller.isGrounded)
-                currentSpeed = 0;
+            currentSpeed = 0;
         }
 
-        // Apply Gravity
-        if (!controller.isGrounded)
-            velocityY += Time.deltaTime * gravity;
-
-        // Workout velocity
-        Vector3 velocity = transform.forward * currentSpeed + Vector3.up * velocityY;
-
-        // Move the player
-        controller.Move(velocity * Time.deltaTime);
-        //currentSpeed = new Vector2(controller.velocity.x, controller.velocity.z).magnitude;
-
-        // Check to see if the controller has just been grounded
-        if(controller.isGrounded && !groundedPrevFrame)
+        if (canJump)
         {
-            OnGrounded();
+            JumpInput();
         }
 
+        if (controller.isGrounded)
+        {
+            if (canCharge)
+            {
+                ChargeInput();
+            }
+            else
+            {
+                isCharge = false;
+            }
+        }
+
+        ApplyGravity();
+        MovePlayer();
+        CheckGrounded();
         UpdateAnimations();
 
         // Set groundedPrevFrame to isGrounded at the end of 
@@ -170,14 +180,81 @@ public class PlayerController2 : MonoBehaviour {
 
     #region Methods
 
+    #region Input Methods
+    private void RefreshMovement()
+    {
+        if (playerActive)
+        {
+            moveInput = new Vector2(Input.GetAxisRaw(GetInputString("Horizontal")), Input.GetAxisRaw(GetInputString("Vertical")));
+            
+
+            sprintKeyDown = Mathf.Abs(Input.GetAxis(GetInputString("Sprint"))) > 0;
+        }
+        else
+        {
+            moveInput = Vector2.zero;
+            sprintKeyDown = false;
+        }
+
+        direction = moveInput.normalized;
+    }
+    private void JumpInput()
+    {
+        if (Input.GetButtonDown(GetInputString("Jump")))
+        {
+            Jump(jumpHeight);
+        }
+    }
+    private void ChargeInput()
+    {
+        if (Input.GetButtonDown(GetInputString("Charge Jump")))
+        {
+            canMove = false;
+            isCharge = true;
+        }
+
+        if (isCharge)
+        {
+            chargeValue++;
+
+            if (Input.GetButtonUp(GetInputString("Charge Jump")))
+            {
+                Charge();
+            }
+        }
+    }
+    #endregion
+
     #region Move
+    public void ApplyGravity()
+    {
+        // Apply Gravity
+        if (!controller.isGrounded)
+            velocityY += Time.deltaTime * gravity;
+    }
+    private void MovePlayer()
+    {
+        // Workout velocity
+        Vector3 velocity = transform.forward * currentSpeed + Vector3.up * velocityY;
+
+        // Move the player
+        controller.Move(velocity * Time.deltaTime);
+        //currentSpeed = new Vector2(controller.velocity.x, controller.velocity.z).magnitude;
+    }
+    private void CheckGrounded()
+    {
+        // Check to see if the controller has just been grounded
+        if (controller.isGrounded && !groundedPrevFrame)
+        {
+            OnGrounded();
+        }
+    }
     protected virtual float GetCurrentSpeed(Vector2 direction)
     {
         // If the player can move, work out the current speed
         if (canMove)
         {
-            bool running = Mathf.Abs(Input.GetAxis(GetInputString("Sprint"))) > 0;
-            float targetSpeed = ((running) ? runSpeed : walkSpeed) * direction.magnitude;
+            float targetSpeed = ((isSprinting) ? runSpeed : walkSpeed) * direction.magnitude;
 
             return Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
         }
@@ -191,12 +268,13 @@ public class PlayerController2 : MonoBehaviour {
     }
     #endregion
     #region Jump
-    public void Jump(float height)
+    public void Jump(float height, bool lockSpeed = true)
     {
         if(GodMode || CanJumpCheck())
         {
             float jumpVelocity = Mathf.Sqrt(-2 * gravity * height); //Jump equation
             velocityY = jumpVelocity;
+            this.lockSpeed = lockSpeed;
         }
     }
     protected virtual bool CanJumpCheck()
@@ -205,8 +283,8 @@ public class PlayerController2 : MonoBehaviour {
     }
     protected virtual void OnGrounded()
     {
-        animator.SetBool("isJumping", false);
         isCharge = false;
+        lockSpeed = false;
     }
     #endregion
     #region Charge
@@ -232,22 +310,21 @@ public class PlayerController2 : MonoBehaviour {
     {
         if (animator && animator.runtimeAnimatorController != null)
         {
-            bool isMoving = currentSpeed > 0;
             animator.SetBool("isMoving", isMoving);
+
             if (isMoving)
             {
-                //animator.SetFloat("Speed", currentSpeed);
-                animator.SetFloat("Z_Axis", currentSpeed);
+                Debug.Log("Speed: " + currentSpeed);
+                animator.SetFloat("Speed", currentSpeed);
             }
             else
             {
                 animator.SetFloat("Speed", 0);
             }
 
-            if (velocityY > 0)
-            {
-                animator.SetBool("isJumping", true);
-            }
+            animator.SetBool("isSprinting", isSprinting);
+            animator.SetBool("isJumping", isJumping);
+            animator.SetBool("isFalling", isFalling);
 
             animator.SetBool("isCharging", isCharge);
             animator.SetFloat("ChargeAmount", chargeValue / 60);
@@ -264,7 +341,14 @@ public class PlayerController2 : MonoBehaviour {
         Transform footstepSpawn = transform.Find("FootstepSpawn");
         if (!footstepSpawn) footstepSpawn = transform;
 
-        Instantiate(FootstepParticles, footstepSpawn.position, footstepSpawn.rotation);
+        Instantiate(FootstepParticles, footstepSpawn.position, footstepSpawn.rotation).transform.localScale = footstepSpawn.lossyScale;
+
+    }
+    public void SetPlayer(int index)
+    {
+        playerNumber = index;
+        playerActive = playerNumber > 0;
+        CameraSettings.CameraReference.SetActive(playerActive);
     }
     #endregion
     #endregion

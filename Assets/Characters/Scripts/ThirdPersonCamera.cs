@@ -15,6 +15,9 @@ public class ThirdPersonCamera : MonoBehaviour {
     Vector3 rotationSmoothVelocity;
     Vector3 currentRotation;
 
+    public float mouseSensitivityX;
+    public float mouseSensitivityY;
+
     float yaw;
     float pitch;
 
@@ -41,8 +44,8 @@ public class ThirdPersonCamera : MonoBehaviour {
         if (player.playerNumber <= 0)
             return;
 
-        yaw += Input.GetAxis(player.GetInputString("Mouse X")) /* mouseSensitivityX */ * player.CameraSettings.LookSensitivityX;
-        pitch -= Input.GetAxis(player.GetInputString("Mouse Y")) /* mouseSensitivityY */ * player.CameraSettings.LookSensitivityY;
+        yaw += Input.GetAxis(player.GetInputString("Mouse X")) * mouseSensitivityX;
+        pitch -= Input.GetAxis(player.GetInputString("Mouse Y")) * mouseSensitivityY;
         pitch = Mathf.Clamp(pitch, pitchMinMax.x, pitchMinMax.y);
 
         currentRotation = Vector3.SmoothDamp(currentRotation, new Vector3(pitch, yaw), ref rotationSmoothVelocity, rotationSmoothTime);

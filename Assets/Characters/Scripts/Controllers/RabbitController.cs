@@ -37,11 +37,11 @@ public class RabbitController : PlayerController2 {
     {
         if (chargeValue > strongChargeThreshold)
         {
-            Jump(strongJumpHeight);
+            Jump(strongJumpHeight, false);
         }
         else if (chargeValue > weakChargeThreshold)
         {
-            Jump(weakJumpHeight);
+            Jump(weakJumpHeight, false);
         }
 
         isChargeJumping = true;

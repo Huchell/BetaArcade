@@ -64,8 +64,7 @@ public class PlayerManager : MonoBehaviour {
 
         if (controllers[index].playerNumber == 0)
         {
-            controllers[index].playerNumber = 2;
-            controllers[index].CameraSettings.CameraReference.SetActive(true);
+            controllers[index].SetPlayer(2);
 
             SplitScreen();
         }
@@ -80,11 +79,8 @@ public class PlayerManager : MonoBehaviour {
     }
     private void SwitchPlayer(PlayerController2 oldController, PlayerController2 newController)
     {
-        oldController.CameraSettings.CameraReference.SetActive(false);
-        newController.CameraSettings.CameraReference.SetActive(true);
-
-        oldController.playerNumber = 0;
-        newController.playerNumber = 1;
+        oldController.SetPlayer(0);
+        newController.SetPlayer(1);
     }
 
     private PlayerController2[] GetCurrentControllers()
@@ -111,7 +107,6 @@ public class PlayerManager : MonoBehaviour {
             controller.CameraSettings.CameraReference.enabled = false;
         }
     }
-
     public void StartAllPlayers()
     {
         foreach (PlayerController2 controller in GetCurrentControllers())
