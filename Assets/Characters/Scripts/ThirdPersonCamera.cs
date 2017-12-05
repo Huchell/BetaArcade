@@ -9,7 +9,10 @@ public class ThirdPersonCamera : MonoBehaviour {
     public Transform target;
     public PlayerController2 player;
     public float distanceFromTraget = 2;
+    public Vector2 distanceMinMax = new Vector2(.5f, 2);
+    public float cameraRadius = -0.5f;
     public Vector2 pitchMinMax = new Vector2(-40, 85);
+    public LayerMask ignoreLayers;
 
     public float rotationSmoothTime = 0.12f;
     Vector3 rotationSmoothVelocity;
@@ -20,6 +23,20 @@ public class ThirdPersonCamera : MonoBehaviour {
 
     float yaw;
     float pitch;
+
+    float Distance
+    {
+        get
+        {
+            RaycastHit hit;
+            if (Physics.SphereCast(target.position, cameraRadius, -transform.forward, out hit, distanceMinMax.y, ~ignoreLayers))
+            {
+                return Mathf.Max(hit.distance, distanceMinMax.x);
+            }
+
+            return distanceMinMax.y;
+        }
+    }
 
     void Start()
     {
@@ -52,11 +69,16 @@ public class ThirdPersonCamera : MonoBehaviour {
 
         transform.eulerAngles = currentRotation;
         
-        transform.position = target.position - transform.forward * distanceFromTraget;
+        transform.position = target.position - transform.forward * Distance;
 	}
 
     public void SetActive(bool value)
     {
         gameObject.SetActive(value);
+    }
+
+    public void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(transform.position, cameraRadius);
     }
 }
