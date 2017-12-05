@@ -8,14 +8,16 @@ public class BooksComeAndGoLogic : MonoBehaviour {
     public class books
     {
         public GameObject prefab;
-        public bool activeWhileOn;
+        public bool activeWhileStoodOn = true;
     }
 
     public List<books> bookList;
+
     [HideInInspector]
     public List<GameObject> booksInWorld = new List<GameObject>();
     public float spawnDelay = 1.5f;
 
+    [HideInInspector]
     public Material ghost;
 
     // Use this for initialization
@@ -23,13 +25,15 @@ public class BooksComeAndGoLogic : MonoBehaviour {
     {
         for (int book = 0; book < booksInWorld.Count; book++)
         {
-            if (bookList[book].activeWhileOn)
+            if (bookList[book].activeWhileStoodOn)
             {
                 booksInWorld[book].GetComponent<MeshRenderer>().sharedMaterial = bookList[book].prefab.GetComponent<MeshRenderer>().sharedMaterial;
                 booksInWorld[book].GetComponent<MeshRenderer>().enabled = false;
             }
         }
-	}
+
+        StartCoroutine(bookDelay(0, false));
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -41,7 +45,7 @@ public class BooksComeAndGoLogic : MonoBehaviour {
         StartCoroutine(bookDelay(spawnDelay, false));
     }
     
-    public void RefreshBooks()
+    public void ResetBooks()
     {
         foreach (GameObject book in booksInWorld)
         {
@@ -61,11 +65,28 @@ public class BooksComeAndGoLogic : MonoBehaviour {
                 newBook.transform.SetParent(transform, false);
 
                 newBook.transform.position = transform.position + new Vector3(0, 0, 2f*x);
-
-                if (bookList[x].activeWhileOn)
+                
+                if (bookList[x].activeWhileStoodOn)
                 {
                     newBook.GetComponent<MeshRenderer>().sharedMaterial = ghost;
                 }
+            }
+        }
+    }
+
+    public void UpdateBooks()
+    {
+        for (int x = 0; x < bookList.Count; x++)
+        {
+            if (bookList[x].activeWhileStoodOn)
+            {
+                booksInWorld[x].GetComponent<MeshRenderer>().sharedMaterial = ghost;
+                booksInWorld[x].GetComponent<Collider>().enabled = false;
+            }
+            else
+            {
+                booksInWorld[x].GetComponent<MeshRenderer>().sharedMaterial = bookList[x].prefab.GetComponent<MeshRenderer>().sharedMaterial;
+                booksInWorld[x].GetComponent<Collider>().enabled = true;
             }
         }
     }
@@ -78,16 +99,16 @@ public class BooksComeAndGoLogic : MonoBehaviour {
         {
             for (int book = 0; book < booksInWorld.Count; book++)
             {
-                booksInWorld[book].GetComponent<MeshRenderer>().enabled = bookList[book].activeWhileOn;
-                booksInWorld[book].GetComponent<Collider>().enabled = bookList[book].activeWhileOn;
+                booksInWorld[book].GetComponent<MeshRenderer>().enabled = bookList[book].activeWhileStoodOn;
+                booksInWorld[book].GetComponent<Collider>().enabled = bookList[book].activeWhileStoodOn;
             }
         }
         else
         {
             for (int book = 0; book < booksInWorld.Count; book++)
             {
-                booksInWorld[book].GetComponent<MeshRenderer>().enabled = !bookList[book].activeWhileOn;
-                booksInWorld[book].GetComponent<Collider>().enabled = !bookList[book].activeWhileOn;
+                booksInWorld[book].GetComponent<MeshRenderer>().enabled = !bookList[book].activeWhileStoodOn;
+                booksInWorld[book].GetComponent<Collider>().enabled = !bookList[book].activeWhileStoodOn;
             }
         }
     }

@@ -10,9 +10,15 @@ public class BookEditor : Editor {
     {
         DrawDefaultInspector();
         BooksComeAndGoLogic script = (BooksComeAndGoLogic)target;
-        if (GUILayout.Button ("Refresh Books"))
-		{
-			script.RefreshBooks();
+        if (GUILayout.Button("Update Books"))
+        {
+            Undo.RecordObject(script, "UpdateBooks");
+            script.UpdateBooks();
+        }
+        if (GUILayout.Button ("Reset Books"))
+        {
+            Undo.RecordObject(script, "ResetBooks");
+            script.ResetBooks();
 		}
     }
 }
