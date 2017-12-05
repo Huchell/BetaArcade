@@ -8,7 +8,7 @@ public class platform_Ring_Update : MonoBehaviour
 
     [Tooltip("Number of platforms. Capped at 32 for stability; see Adam if this cap is insufficient. You must click 'Refresh Platforms' to make this change.")]
     public int numberOfPlatforms;
-    private GameObject[] platforms;
+    public GameObject[] platforms;
     [Tooltip("Radius of ring of platforms. You must click 'Refresh Platforms' to make this change.")]
     public float radius = 5f;
     [Tooltip("Prefab used for platform and ghosts. You must click 'Refresh Platforms' to make this change.")]
@@ -23,6 +23,13 @@ public class platform_Ring_Update : MonoBehaviour
     [Tooltip("Rotations per second. 0.1f means it will take 10 seconds for one full rotation.")]
     public float RPS = 0.1f;
     private MeshFilter mf;
+    private float worldTime = 0f;
+
+    [Tooltip("Height that platforms will rise and fall for.")]
+    public float heightOffset = 50.0f;
+
+    [Tooltip("Speed that platforms will rise and fall.")]
+    public float riseSpeed = 1.0f;
 
     public bool isActive = true;
 
@@ -37,6 +44,21 @@ public class platform_Ring_Update : MonoBehaviour
         if (isActive)
         {
             transform.RotateAround(transform.position, Vector3.up, 360f * RPS * Time.deltaTime);
+
+            worldTime += Time.deltaTime;
+
+            if (heightOffset != 0 && riseSpeed != 0)
+            {
+                for (int x = 0; x < platforms.Length; x++)
+                {
+                    float ratio = (float)x / (float)(platforms.Length);
+                    float timeMod = worldTime * riseSpeed / heightOffset;
+
+                    float yOffsetAmount = Mathf.Sin((timeMod + ratio) * 2 * Mathf.PI);
+
+                    platforms[x].gameObject.transform.position = new Vector3(platforms[x].transform.position.x, (transform.position.y) + (yOffsetAmount), platforms[x].transform.position.z);
+                }
+            }
         }
     }
 
