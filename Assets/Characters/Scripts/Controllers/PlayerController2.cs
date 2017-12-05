@@ -59,14 +59,14 @@ public class PlayerController2 : MonoBehaviour {
     {
         get
         {
-            return isWalking || isSprinting;
+            return direction != Vector2.zero;
         }
     }
     private bool isWalking
     {
         get
         {
-            return !isSprinting && moveInput.magnitude > 0;
+            return isMoving && !isJumping && !isFalling && !sprintKeyDown;
         }
     }
     private bool isJumping
@@ -87,7 +87,7 @@ public class PlayerController2 : MonoBehaviour {
     {
         get
         {
-            return !isJumping && !isFalling && sprintKeyDown;
+            return isMoving && !isJumping && !isFalling && sprintKeyDown;
         }
     }
     #endregion
@@ -130,15 +130,9 @@ public class PlayerController2 : MonoBehaviour {
 
         RefreshMovement();
 
-        if (playerActive)
-        {
-            JumpInput();
-            ChargeInput();
-        }
-
         if (canMove)
         {
-            if (!lockSpeed) currentSpeed = GetCurrentSpeed(direction);
+            currentSpeed = GetCurrentSpeed(direction);
 
             if (direction != Vector2.zero) //stops 0/0 errors
             {
@@ -166,6 +160,11 @@ public class PlayerController2 : MonoBehaviour {
             {
                 isCharge = false;
             }
+        }
+
+        if (isCharge)
+        {
+            chargeValue++;
         }
 
         ApplyGravity();
@@ -200,6 +199,7 @@ public class PlayerController2 : MonoBehaviour {
     }
     private void JumpInput()
     {
+        if (playerActive)
         if (Input.GetButtonDown(GetInputString("Jump")))
         {
             Jump(jumpHeight);
@@ -207,15 +207,13 @@ public class PlayerController2 : MonoBehaviour {
     }
     private void ChargeInput()
     {
-        if (Input.GetButtonDown(GetInputString("Charge Jump")))
+        if (playerActive)
         {
-            canMove = false;
-            isCharge = true;
-        }
-
-        if (isCharge)
-        {
-            chargeValue++;
+            if (Input.GetButtonDown(GetInputString("Charge Jump")))
+            {
+                canMove = false;
+                isCharge = true;
+            }
 
             if (Input.GetButtonUp(GetInputString("Charge Jump")))
             {
@@ -268,13 +266,12 @@ public class PlayerController2 : MonoBehaviour {
     }
     #endregion
     #region Jump
-    public void Jump(float height, bool lockSpeed = true)
+    public void Jump(float height)
     {
         if(GodMode || CanJumpCheck())
         {
             float jumpVelocity = Mathf.Sqrt(-2 * gravity * height); //Jump equation
             velocityY = jumpVelocity;
-            this.lockSpeed = lockSpeed;
         }
     }
     protected virtual bool CanJumpCheck()
@@ -314,7 +311,7 @@ public class PlayerController2 : MonoBehaviour {
 
             if (isMoving)
             {
-                Debug.Log("Speed: " + currentSpeed);
+                
                 animator.SetFloat("Speed", currentSpeed);
             }
             else
@@ -322,12 +319,16 @@ public class PlayerController2 : MonoBehaviour {
                 animator.SetFloat("Speed", 0);
             }
 
+            animator.SetBool("isWalking", isWalking);
             animator.SetBool("isSprinting", isSprinting);
             animator.SetBool("isJumping", isJumping);
             animator.SetBool("isFalling", isFalling);
 
             animator.SetBool("isCharging", isCharge);
             animator.SetFloat("ChargeAmount", chargeValue / 60);
+
+            if (!controller.isGrounded && groundedPrevFrame)
+                animator.SetTrigger("FellOff");
         }
     }
 

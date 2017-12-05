@@ -19,6 +19,9 @@ public class DestructibleObject : MonoBehaviour {
     [SerializeField]
     [Tooltip("")]
     private GameObject NormalMesh;
+    [SerializeField]
+    [Tooltip("Seconds that the destructible will stay in the scene after it is destroyed")]
+    private float Lifetime = 2f;
     [Space]
     public UnityEngine.Events.UnityEvent OnBroken;
 
@@ -35,6 +38,7 @@ public class DestructibleObject : MonoBehaviour {
         yield return null;
         initialized = true;
     }
+
     private void OnChargeHit(CatController controller)
     {
         controller.IgnoreHit();
@@ -43,12 +47,11 @@ public class DestructibleObject : MonoBehaviour {
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (initialized)
+        if (initialized && 
+            !collision.gameObject.CompareTag("Player") && 
+            collision.relativeVelocity.magnitude > DestroyThreshold)
         {
-            if (collision.impulse.magnitude > DestroyThreshold)
-            {
-                DestroyMesh();
-            }
+            DestroyMesh();
         }
     }
 
@@ -60,5 +63,19 @@ public class DestructibleObject : MonoBehaviour {
         DestructibleMesh.SetActive(true);
 
         OnBroken.Invoke();
+        Destroy(gameObject, Lifetime);
+    }
+
+    private void OnDestroy()
+    {
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+
+            if (child && 
+                child != DestructibleMesh.transform && 
+                child != NormalMesh.transform)
+                transform.GetChild(i).SetParent(transform.parent, true);
+        }
     }
 }
