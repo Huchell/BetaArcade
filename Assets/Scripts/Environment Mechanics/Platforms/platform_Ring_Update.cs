@@ -8,6 +8,7 @@ public class platform_Ring_Update : MonoBehaviour
 
     [Tooltip("Number of platforms. Capped at 32 for stability; see Adam if this cap is insufficient. You must click 'Refresh Platforms' to make this change.")]
     public int numberOfPlatforms;
+    [HideInInspector]
     public GameObject[] platforms;
     [Tooltip("Radius of ring of platforms. You must click 'Refresh Platforms' to make this change.")]
     public float radius = 5f;
