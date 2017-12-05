@@ -78,6 +78,9 @@ public class CatController : PlayerController2 {
         
         if ((controller.collisionFlags & CollisionFlags.CollidedSides) == CollisionFlags.CollidedSides)
         {
+            //Spawn Wall Particles
+            //hit.point <- Point of collision
+            //hit.normal <-normal of collision
             isCharging = false;
         }
     }

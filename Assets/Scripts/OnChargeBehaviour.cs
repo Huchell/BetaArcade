@@ -9,7 +9,7 @@ public class OnChargeBehaviour : MonoBehaviour {
 
     void OnChargeHit(CatController controller)
     {
-        Debug.Log("Hit");
+        //Debug.Log("Hit");
         OnCharge.Invoke();
     }
 }
