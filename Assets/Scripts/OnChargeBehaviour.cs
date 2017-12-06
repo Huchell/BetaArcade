@@ -6,10 +6,24 @@ using UnityEngine.Events;
 public class OnChargeBehaviour : MonoBehaviour {
 
     public UnityEvent OnCharge;
+    [SerializeField] private bool invokeCharge = true;
+
+    public bool InvokeCharge
+    {
+        get
+        {
+            return invokeCharge;
+        }
+        set
+        {
+            InvokeCharge = value;
+        }
+    }
 
     void OnChargeHit(CatController controller)
     {
-        //Debug.Log("Hit");
-        OnCharge.Invoke();
+        if (InvokeCharge)
+            //Debug.Log("Hit");
+            OnCharge.Invoke();
     }
 }

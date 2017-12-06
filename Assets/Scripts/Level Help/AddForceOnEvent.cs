@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 [RequireComponent(typeof(Rigidbody))]
 public class AddForceOnEvent : MonoBehaviour {
 
@@ -19,3 +20,18 @@ public class AddForceOnEvent : MonoBehaviour {
         GetComponent<Rigidbody>().AddForce(m_force, m_ForceMode);
     }
 }
+
+#if UNITY_EDITOR
+[UnityEditor.CustomEditor(typeof(AddForceOnEvent))]
+public class AddForceOnEventEditor : UnityEditor.Editor
+{
+    public override void OnInspectorGUI()
+    {
+        DrawDefaultInspector();
+        if (GUILayout.Button("Add Force"))
+        {
+            (target as AddForceOnEvent).AddForce();
+        }
+    }
+}
+#endif

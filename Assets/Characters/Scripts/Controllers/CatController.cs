@@ -6,6 +6,7 @@ using UnityEngine;
 public class CatController : PlayerController2 {
 
     public bool isCharging;
+    public ParticleSystem WallBashParticles;
     private bool chargeInterrupted;
     private CatChargeHitbox m_ChargeHitBox;
 
@@ -40,12 +41,12 @@ public class CatController : PlayerController2 {
         if (chargeValue >= chargeThreshold)
             StartCoroutine(ChargeCoroutine());
     }
-    protected override float GetCurrentSpeed(Vector2 direction)
+    protected override void GetCurrentTargetSpeed(Vector2 direction)
     {
         if (isCharging)
-            return ChargeSpeed;
+            targetSpeed = ChargeSpeed;
         else
-            return base.GetCurrentSpeed(direction);
+            base.GetCurrentTargetSpeed(direction);
     }
     protected override float GetRotationDamp()
     {
@@ -78,19 +79,28 @@ public class CatController : PlayerController2 {
         
         if ((controller.collisionFlags & CollisionFlags.CollidedSides) == CollisionFlags.CollidedSides)
         {
-            //Spawn Wall Particles
-            //hit.point <- Point of collision
-            //hit.normal <-normal of collision
-            isCharging = false;
+            if (isCharging)
+            {
+                isCharging = false;
+                RaycastHit hitInfo;
+                if (Physics.SphereCast(transform.position + controller.center, controller.radius, transform.forward, out hitInfo, 0.1f))
+                {
+                    if (WallBashParticles)
+                    {
+                        ParticleSystem particles = Instantiate(WallBashParticles, hitInfo.point, Quaternion.LookRotation(hitInfo.normal, Vector3.up));
+                        particles.transform.localScale = Vector3.one * 0.1f;
+                    }
+                }
+            }
         }
     }
-
 
     IEnumerator ResetCharge()
     {
         yield return null;
         isCharging = false;
     }
+
     public void IgnoreHit()
     {
         if (chargeReset != null) StopCoroutine(chargeReset);

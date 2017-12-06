@@ -33,6 +33,7 @@ public class PlayerController2 : MonoBehaviour {
     float currentSpeed;
     [SerializeField][ReadOnly]
     float velocityY;
+    [SerializeField][ReadOnly]
     bool isCharge = false;
 
     public bool canMove = true;
@@ -43,6 +44,7 @@ public class PlayerController2 : MonoBehaviour {
 
     private Vector2 moveInput;
     private Vector2 direction;
+    protected float targetSpeed;
     private bool sprintKeyDown = false;
 
     public int playerNumber = 0;
@@ -66,7 +68,7 @@ public class PlayerController2 : MonoBehaviour {
     {
         get
         {
-            return isMoving && !isJumping && !isFalling && !sprintKeyDown;
+            return isMoving && !sprintKeyDown;
         }
     }
     private bool isJumping
@@ -87,7 +89,7 @@ public class PlayerController2 : MonoBehaviour {
     {
         get
         {
-            return isMoving && !isJumping && !isFalling && sprintKeyDown;
+            return isMoving && sprintKeyDown;
         }
     }
     #endregion
@@ -129,21 +131,18 @@ public class PlayerController2 : MonoBehaviour {
     void Update() {
 
         RefreshMovement();
+        GetCurrentTargetSpeed(direction);
 
         if (canMove)
         {
-            currentSpeed = GetCurrentSpeed(direction);
+            currentSpeed = Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
 
             if (direction != Vector2.zero) //stops 0/0 errors
             {
                 float targetRot = Mathf.Atan2(direction.x, direction.y) * GetRotationDamp() * Mathf.Rad2Deg + cameraT.eulerAngles.y;
                 transform.eulerAngles = Vector3.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRot, ref turnSmoothVelocity, turnSmoothTime); //Character rotation
             }
-        }
-        else
-        {
-            currentSpeed = 0;
-        }
+        } else { currentSpeed = 0; }
 
         if (canJump)
         {
@@ -185,8 +184,6 @@ public class PlayerController2 : MonoBehaviour {
         if (playerActive)
         {
             moveInput = new Vector2(Input.GetAxisRaw(GetInputString("Horizontal")), Input.GetAxisRaw(GetInputString("Vertical")));
-            
-
             sprintKeyDown = Mathf.Abs(Input.GetAxis(GetInputString("Sprint"))) > 0;
         }
         else
@@ -212,6 +209,7 @@ public class PlayerController2 : MonoBehaviour {
             if (Input.GetButtonDown(GetInputString("Charge Jump")))
             {
                 canMove = false;
+                targetSpeed = 0;
                 isCharge = true;
             }
 
@@ -247,18 +245,17 @@ public class PlayerController2 : MonoBehaviour {
             OnGrounded();
         }
     }
-    protected virtual float GetCurrentSpeed(Vector2 direction)
+    protected virtual void GetCurrentTargetSpeed(Vector2 direction)
     {
         // If the player can move, work out the current speed
-        if (canMove)
+        if (playerActive)
         {
-            float targetSpeed = ((isSprinting) ? runSpeed : walkSpeed) * direction.magnitude;
-
-            return Mathf.SmoothDamp(currentSpeed, targetSpeed, ref speedSmoothVelocity, speedSmoothTime);
+            if (canMove && !isJumping) targetSpeed = ((isSprinting) ? runSpeed : walkSpeed) * direction.magnitude;
         }
-
-        // else set the speed to 0
-        return 0;
+        else
+        {
+            targetSpeed = 0;
+        }
     }
     protected virtual float GetRotationDamp()
     {
@@ -327,7 +324,7 @@ public class PlayerController2 : MonoBehaviour {
             animator.SetBool("isCharging", isCharge);
             animator.SetFloat("ChargeAmount", chargeValue / 60);
 
-            if (!controller.isGrounded && groundedPrevFrame)
+            if (!controller.isGrounded && groundedPrevFrame && !isJumping)
                 animator.SetTrigger("FellOff");
         }
     }
@@ -339,11 +336,13 @@ public class PlayerController2 : MonoBehaviour {
     }
     void Footstep()
     {
-        Transform footstepSpawn = transform.Find("FootstepSpawn");
-        if (!footstepSpawn) footstepSpawn = transform;
+        if (FootstepParticles)
+        {
+            Transform footstepSpawn = transform.Find("FootstepSpawn");
+            if (!footstepSpawn) footstepSpawn = transform;
 
-        Instantiate(FootstepParticles, footstepSpawn.position, footstepSpawn.rotation).transform.localScale = footstepSpawn.lossyScale;
-
+            Instantiate(FootstepParticles, footstepSpawn.position, footstepSpawn.rotation).transform.localScale = footstepSpawn.lossyScale;
+        }
     }
     public void SetPlayer(int index)
     {

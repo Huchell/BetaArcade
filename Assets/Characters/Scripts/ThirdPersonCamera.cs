@@ -29,7 +29,7 @@ public class ThirdPersonCamera : MonoBehaviour {
         get
         {
             RaycastHit hit;
-            if (Physics.SphereCast(target.position, cameraRadius, -transform.forward, out hit, distanceMinMax.y, ~ignoreLayers))
+            if (Physics.SphereCast(target.position, cameraRadius, -transform.forward, out hit, distanceMinMax.y, ~ignoreLayers, QueryTriggerInteraction.Ignore))
             {
                 return Mathf.Max(hit.distance, distanceMinMax.x);
             }
