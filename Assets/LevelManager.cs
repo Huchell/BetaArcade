@@ -7,7 +7,6 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 #endif
 
-[ExecuteInEditMode]
 public class LevelManager : MonoBehaviour {
 
     private static LevelManager instance;
@@ -39,15 +38,30 @@ public class LevelManager : MonoBehaviour {
 
     public string[] Scenes;
 
+    private void Start()
+    {
+        LoadScenes();
+    }
+
     public void LoadScenes()
     {
 #if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            foreach (string s in Scenes)
+            {
+                if (!EditorSceneManager.GetSceneByName(s).isLoaded)
+                    EditorSceneManager.OpenScene("Assets/Scenes/" + s + ".unity", UnityEditor.SceneManagement.OpenSceneMode.Additive);
+            }
+            return;
+        }
+#endif
+
         foreach (string s in Scenes)
         {
-            EditorSceneManager.OpenScene("Assets/Scenes/" + s + ".unity", UnityEditor.SceneManagement.OpenSceneMode.Additive);
+            if (!SceneManager.GetSceneByName(s).isLoaded)
+                SceneManager.LoadScene(s, LoadSceneMode.Additive);
         }
-        return;
-#endif
     }
 }
 

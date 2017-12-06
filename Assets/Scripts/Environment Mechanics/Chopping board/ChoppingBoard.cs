@@ -82,7 +82,7 @@ public class ChoppingBoard : MonoBehaviour {
 
         foreach (Knife k in knives)
         {
-            if (k.isChopping)
+            if (k && k.isChopping)
             {
                 returnBool = true;
                 break;
