@@ -105,4 +105,16 @@ public class CatController : PlayerController2 {
     {
         if (chargeReset != null) StopCoroutine(chargeReset);
     }
+    public override void StopCharge()
+    {
+        base.StopCharge();
+        isCharging = false;
+    }
+
+    protected override void UpdateAnimations()
+    {
+        base.UpdateAnimations();
+
+        if (isCharging) animator.SetBool("isCharging", true);
+    }
 }

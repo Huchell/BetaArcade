@@ -157,7 +157,7 @@ ModelImporter:
           postInfinity: 3
           rotationOrder: 0
       events:
-      - time: 0.7151515
+      - time: 0.74731076
         functionName: Charge
         data: 
         objectReferenceParameter: {fileID: 11500000, guid: 21746bffa62549643a88a89edf8e7783,

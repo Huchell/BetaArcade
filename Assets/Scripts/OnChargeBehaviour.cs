@@ -5,8 +5,11 @@ using UnityEngine.Events;
 
 public class OnChargeBehaviour : MonoBehaviour {
 
-    public UnityEvent OnCharge;
     [SerializeField] private bool invokeCharge = true;
+    [SerializeField] private bool forceChargeToStop = false;
+
+    public UnityEvent OnCharge;
+    
 
     public bool InvokeCharge
     {
@@ -16,14 +19,21 @@ public class OnChargeBehaviour : MonoBehaviour {
         }
         set
         {
-            InvokeCharge = value;
+            invokeCharge = value;
         }
     }
 
     void OnChargeHit(CatController controller)
     {
         if (InvokeCharge)
-            //Debug.Log("Hit");
+        {
+            if (forceChargeToStop)
+            {
+                controller.StopCharge();
+            }
+
             OnCharge.Invoke();
+
+        }
     }
 }

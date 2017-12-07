@@ -41,8 +41,11 @@ public class DestructibleObject : MonoBehaviour {
 
     private void OnChargeHit(CatController controller)
     {
-        controller.IgnoreHit();
-        DestroyMesh();
+        if (initialized)
+        {
+            controller.IgnoreHit();
+            DestroyMesh();
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -58,6 +61,7 @@ public class DestructibleObject : MonoBehaviour {
     public void DestroyMesh()
     {
         GetComponent<MeshCollider>().enabled = false;
+        GetComponent<Rigidbody>().isKinematic = true;
 
         NormalMesh.SetActive(false);
         DestructibleMesh.SetActive(true);

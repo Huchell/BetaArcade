@@ -40,5 +40,7 @@ public class SwapObject : MonoBehaviour {
 
             newGameObject.transform.localScale = spawnScl;
         }
+
+        Destroy(gameObject);
     }
 }
