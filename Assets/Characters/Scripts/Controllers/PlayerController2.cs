@@ -244,7 +244,7 @@ public class PlayerController2 : MonoBehaviour {
                 ChargingUp = true;
             }
 
-            if (Input.GetButtonUp(GetInputString("Charge Jump")))
+            if (ChargingUp && Input.GetButtonUp(GetInputString("Charge Jump")))
             {
                 Charge();
             }

@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
 public class Collectable_Line : MonoBehaviour {
 
@@ -17,7 +16,7 @@ public class Collectable_Line : MonoBehaviour {
     {
         if (DrawLine)
         {
-            Handles.DrawLine(startButton.transform.position, endButton.transform.position);
+            Gizmos.DrawLine(startButton.transform.position, endButton.transform.position);
         }
     }
 
@@ -70,7 +69,7 @@ public class Collectable_Line : MonoBehaviour {
                 coin.name = "Collectable_Line_[" + (x+1) + "]";
             }
 
-            OnDrawGizmos();
+            //OnDrawGizmos();
         }
     }
 }
