@@ -7,6 +7,7 @@ public class RabbitController : PlayerController2 {
 
     [SerializeField][ReadOnly]
     private bool isDJump = false;
+    [SerializeField][ReadOnly]
     private bool isChargeJumping = false;
 
     [SerializeField]
@@ -46,13 +47,13 @@ public class RabbitController : PlayerController2 {
         if (chargeValue > strongChargeThreshold)
         {
             Jump(strongJumpHeight, false);
+            isChargeJumping = true;
         }
         else if (chargeValue > weakChargeThreshold)
         {
             Jump(weakJumpHeight, false);
+            isChargeJumping = true;
         }
-
-        isChargeJumping = true;
     }
     protected override void OnGrounded()
     {
