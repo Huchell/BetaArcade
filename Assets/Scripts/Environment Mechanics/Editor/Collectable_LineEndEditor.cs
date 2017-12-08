@@ -12,7 +12,14 @@ public class Collectable_LineEndEditor : Editor
         if (GUILayout.Button("Refresh Buttons"))
         {
             Collectable_LineEnd script = (Collectable_LineEnd)target;
-            Selection.activeGameObject = script.startButton.transform.gameObject;
+            script.startButton.transform.gameObject.GetComponent<Collectable_Line>().RefreshButtons();
         }
     }
+
+    public void OnSceneGUI()
+    {
+        Collectable_LineEnd script = (Collectable_LineEnd)target;
+        script.startButton.transform.gameObject.GetComponent<Collectable_Line>().RefreshButtons();
+    }
+
 }
