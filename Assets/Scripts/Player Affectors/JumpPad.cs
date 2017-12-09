@@ -11,7 +11,7 @@ public class JumpPad : MonoBehaviour {
         if (other.CompareTag("Player"))
         {
             PlayerController2 controller = other.GetComponent<PlayerController2>();
-
+            Debug.Log("Bounce!");
             if (controller) controller.Jump(jumpHeight);
         }
     }
