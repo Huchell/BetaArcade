@@ -51,7 +51,7 @@ public class LevelManager : MonoBehaviour {
             foreach (string s in Scenes)
             {
                 if (!EditorSceneManager.GetSceneByName(s).isLoaded)
-                    EditorSceneManager.OpenScene("Assets/Scenes/" + s + ".unity", UnityEditor.SceneManagement.OpenSceneMode.Additive);
+                    EditorSceneManager.OpenScene("Assets/Scenes/Level Parts/" + s + ".unity", UnityEditor.SceneManagement.OpenSceneMode.Additive);
             }
             return;
         }
