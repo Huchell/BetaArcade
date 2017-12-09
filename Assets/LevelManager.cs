@@ -36,8 +36,6 @@ public class LevelManager : MonoBehaviour {
             instance = null;
     }
 
-    [Header("Loading Scenes")]
-    public string scenesFolderPath = "Level Parts";
     public string[] Scenes;
 
     private void Start()
@@ -53,7 +51,7 @@ public class LevelManager : MonoBehaviour {
             foreach (string s in Scenes)
             {
                 if (!EditorSceneManager.GetSceneByName(s).isLoaded)
-                    EditorSceneManager.OpenScene(string.Format("Assets/Scenes/{0}/{1}.{2}", scenesFolderPath, s, "unity"), UnityEditor.SceneManagement.OpenSceneMode.Additive);
+                    EditorSceneManager.OpenScene("Assets/Scenes/" + s + ".unity", UnityEditor.SceneManagement.OpenSceneMode.Additive);
             }
             return;
         }
