@@ -20,6 +20,11 @@ public class Collectable_Line : MonoBehaviour {
         }
     }
 
+    public void Start()
+    {
+        transform.parent.GetComponent<MeshRenderer>().enabled = false;
+    }
+
     public void RefreshButtons()
     {
         if (coinCount < 2)
@@ -35,6 +40,7 @@ public class Collectable_Line : MonoBehaviour {
             {
                 GameObject coin = Instantiate(prefab);
                 coin.transform.SetParent(transform.parent, false);
+                coin.transform.localScale = new Vector3(1f / transform.parent.localScale.x, 1f / transform.parent.localScale.y, 1f / transform.parent.localScale.z);
                 if (endButtonLastPosition != null && endButtonLastPosition != Vector3.zero)
                 {
                     coin.transform.position = endButtonLastPosition;
@@ -66,6 +72,7 @@ public class Collectable_Line : MonoBehaviour {
                 midButtons[x] = coin;
                 coin.transform.SetParent(transform.parent, false);
                 coin.transform.position = Vector3.Lerp(startButton.transform.position, endButton.transform.position, (float)(x+1)/(float)(coinCount - 1));
+                coin.transform.localScale = new Vector3(1f/transform.parent.localScale.x, 1f/transform.parent.localScale.y, 1f/transform.parent.localScale.z);
                 coin.name = "Collectable_Line_[" + (x+1) + "]";
             }
 

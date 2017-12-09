@@ -11,9 +11,9 @@ public class SelectParentEditor : Editor
 	public void OnSceneGUI()
 	{
 		selected = Selection.activeGameObject;
-		if (selected.transform.parent != null)
+		if (selected.transform.parent != null && selected.gameObject.GetComponent<SelectParent>() != null)
 		{
-			Selection.activeGameObject = selected.transform.parent.gameObject;
+			Selection.activeGameObject = Selection.activeGameObject.transform.parent.gameObject;
 			selected = null;
 		}
 	}
