@@ -31,6 +31,8 @@ public class Knife : MonoBehaviour {
         get { return m_isChopping; }
     }
 
+
+
     public AudioClip m_ChopClip;
     AudioSource m_audioSource;
 
@@ -39,7 +41,9 @@ public class Knife : MonoBehaviour {
 
     private void Start()
     {
-        m_audioSource = GetComponent<AudioSource>();
+        //m_audioSource = GetComponent<AudioSource>();
+        Debug.Log(transform.GetChild(2).gameObject);
+        m_audioSource = transform.GetChild(2).gameObject.GetComponent<AudioSource>();
     }
     #region Coroutine Callers
 

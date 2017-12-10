@@ -81,6 +81,9 @@ public class PlayerManager : MonoBehaviour {
     {
         oldController.SetPlayer(0);
         newController.SetPlayer(1);
+        
+        oldController.GetComponent<PlayerCameraSettings>().CameraReference.GetComponent<AudioListener>().enabled = false;
+        newController.GetComponent<PlayerCameraSettings>().CameraReference.GetComponent<AudioListener>().enabled = true;
     }
 
     private PlayerController2[] GetCurrentControllers()

@@ -361,9 +361,9 @@ public class PlayerController2 : MonoBehaviour {
                 if (audio)
                 {
                     if (isWalking)
-                        PlayAudioClip(FootstepClip);
+                        PlayAudioClip(FootstepClip, true);
                     else if (isSprinting)
-                        PlayAudioClip(RunningFootstepClip);
+                        PlayAudioClip(RunningFootstepClip, true);
                 }
             }
 
