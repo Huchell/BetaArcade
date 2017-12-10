@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 [AddComponentMenu("")]
-[RequireComponent(typeof(CharacterController), typeof(PlayerCameraSettings))]
+[RequireComponent(typeof(CharacterController), typeof(PlayerCameraSettings), typeof(AudioSource))]
 public class PlayerController2 : MonoBehaviour {
 
     public static bool ingredient1, ingredient2, ingredient3;
@@ -74,11 +75,11 @@ public class PlayerController2 : MonoBehaviour {
     public int playerNumber = 0;
     public bool playerActive = false;
 
-
     #region Components
     protected Transform cameraT;
     protected CharacterController controller;
     protected Animator animator;
+    protected AudioSource audio; 
     #endregion
 
     #region Animation Properties
@@ -140,14 +141,21 @@ public class PlayerController2 : MonoBehaviour {
     private float footstepCooldown = 0.25f;
     [SerializeField]
     private AudioClip FootstepClip;
+    [SerializeField]
+    private AudioClip RunningFootstepClip;
+    [SerializeField]
+    private AudioClip JumpClip;
 
     private bool groundedPrevFrame = false;
+
+    public UnityEvent OnGround;
 
 	// Use this for initialization
 	protected virtual void Start () {
         controller = GetComponent<CharacterController>();
         cameraT = CameraSettings.CameraReference.transform;
         animator = GetComponent<Animator>();
+        audio = GetComponent<AudioSource>();
 
         groundedPrevFrame = controller.isGrounded;
     }
@@ -302,8 +310,9 @@ public class PlayerController2 : MonoBehaviour {
             float jumpVelocity = Mathf.Sqrt(-2 * gravity * height); //Jump equation
             velocityY = jumpVelocity;
 
-
             if (triggerAnim && animator) animator.SetTrigger("Jump");
+
+            PlayAudioClip(JumpClip);
         }
     }
     protected virtual bool CanJumpCheck()
@@ -314,6 +323,8 @@ public class PlayerController2 : MonoBehaviour {
     {
         ChargingUp = false;
         lockSpeed = false;
+
+        OnGround.Invoke();
     }
     #endregion
     #region Charge
@@ -346,12 +357,14 @@ public class PlayerController2 : MonoBehaviour {
 
             if (isMoving)
             {
-                
-                animator.SetFloat("Speed", currentSpeed);
-            }
-            else
-            {
-                animator.SetFloat("Speed", 0);
+                // play footsteps
+                if (audio)
+                {
+                    if (isWalking)
+                        PlayAudioClip(FootstepClip);
+                    else if (isSprinting)
+                        PlayAudioClip(RunningFootstepClip);
+                }
             }
 
             animator.SetBool("isWalking", isWalking);
@@ -386,6 +399,18 @@ public class PlayerController2 : MonoBehaviour {
         playerNumber = index;
         playerActive = playerNumber > 0;
         CameraSettings.CameraReference.SetActive(playerActive);
+    }
+
+    protected void PlayAudioClip(AudioClip clip, bool wait = false)
+    {
+        if (audio)
+        {
+            if (clip)
+            {
+                audio.clip = clip;
+                if (wait && !audio.isPlaying) audio.Play(); else if (!wait) audio.Play();
+            }
+        }
     }
     #endregion
     #endregion
