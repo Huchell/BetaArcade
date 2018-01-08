@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 public enum PlayMode
 {
@@ -99,11 +101,13 @@ public class Rail : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+		#if UNITY_EDITOR
         for(int i = 0; i < (nodes.Length - 1); i++)
         {
             Handles.DrawDottedLine(nodes[i].position, nodes[i + 1].position, 10.0f);
             //Handles.DrawLine(nodes[i].position, nodes[i + 1].position);
         
         }
+		#endif
     }
 }

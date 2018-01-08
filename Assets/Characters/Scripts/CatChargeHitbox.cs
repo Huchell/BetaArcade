@@ -15,6 +15,6 @@ public class CatChargeHitbox : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        other.SendMessage("OnChargeHit", controller, SendMessageOptions.DontRequireReceiver);
+        other.SendMessageUpwards("OnChargeHit", controller, SendMessageOptions.DontRequireReceiver);
     }
 }

@@ -8,20 +8,6 @@ public class PotionMixing : MonoBehaviour {
     public UnityEvent OnPotionFinished;
     GameObject player;
 
-	// Use this for initialization
-	void Start ()
-    {
-       	
-	}
-
-    // Update is called once per frame
-    void Update ()
-    {
-        //If interacted with
-        
-
-    }
-
     private void IngredientCheck(Collider other)
     {
         //if (other.gameObject.GetComponent<PlayerController2>().ingredient1)

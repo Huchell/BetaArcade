@@ -24,7 +24,7 @@ public class BooksComeAndGoLogic : MonoBehaviour {
     void Start ()
     {
         for (int book = 0; book < booksInWorld.Count; book++)
-        {
+		{
             if (bookList[book].activeWhileStoodOn)
             {
                 booksInWorld[book].GetComponent<MeshRenderer>().sharedMaterial = bookList[book].prefab.GetComponent<MeshRenderer>().sharedMaterial;
