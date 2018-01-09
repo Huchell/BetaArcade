@@ -13,6 +13,7 @@ public class JumpPad : MonoBehaviour {
             PlayerController2 controller = other.GetComponent<PlayerController2>();
 
             if (controller) controller.Jump(jumpHeight);
+            other.gameObject.GetComponent<PlayerController2>().OnLevitatePotionStep();
         }
     }
 }
