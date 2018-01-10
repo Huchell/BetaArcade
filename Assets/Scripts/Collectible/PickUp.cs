@@ -19,6 +19,10 @@ public class PickUp : MonoBehaviour {
             //other.gameObject.SetActive(false);
             //count = count + 1;
             //SetCountText();
+
+            //other.gameObject.GetComponent<PlayerController2>();
+
+            other.gameObject.GetComponent<PlayerController2>().OnCollectCollectable();
         }
     }
 }
