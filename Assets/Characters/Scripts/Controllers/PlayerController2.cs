@@ -139,6 +139,8 @@ public class PlayerController2 : MonoBehaviour {
     private bool canFootstep = true;
     [SerializeField]
     private float footstepCooldown = 0.25f;
+    [SerializeField]
+    private float runningFootstepCooldown = 0.25f;
 
     private bool groundedPrevFrame = false;
 
@@ -400,10 +402,10 @@ public class PlayerController2 : MonoBehaviour {
                 // play footsteps
                 if (audio)
                 {
-                    if (isWalking)
-                        PlayAudioClip(FootstepClip);
-                    else if (isSprinting)
-                        PlayAudioClip(RunningFootstepClip);
+                    if (isWalking && !playingWalkingSound)
+                        StartCoroutine("walkingSound");
+                    else if (isSprinting && !playingRunningSound)
+                        StartCoroutine("runningSound");
                 }
             }
 
@@ -418,6 +420,42 @@ public class PlayerController2 : MonoBehaviour {
                 animator.SetTrigger("FellOff");
         }
     }
+
+    bool playingWalkingSound = false;
+
+    IEnumerator walkingSound()
+    {
+        if (!playingWalkingSound)
+        {
+            playingWalkingSound = true;
+
+            while (isWalking)
+            {
+                PlayAudioClip(FootstepClip);
+                yield return new WaitForSecondsRealtime(footstepCooldown);
+            }
+        }
+        playingWalkingSound = false;
+    }
+
+
+    bool playingRunningSound = false;
+
+    IEnumerator runningSound()
+    {
+        if (!playingRunningSound)
+        {
+            playingRunningSound = true;
+
+            while (isSprinting)
+            {
+                PlayAudioClip(RunningFootstepClip);
+                yield return new WaitForSecondsRealtime(runningFootstepCooldown);
+            }
+        }
+        playingRunningSound = false;
+    }
+
 
     #region Util
     public string GetInputString(string input)
