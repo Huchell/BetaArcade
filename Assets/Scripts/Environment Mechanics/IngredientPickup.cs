@@ -18,6 +18,8 @@ public class IngredientPickup : MonoBehaviour {
 
             PlayerController2.ingredientCounter += 1;
             //Debug.Log(other.gameObject.GetComponent<PlayerController2>().ingredientCounter);
+
+            other.gameObject.GetComponent<PlayerController2>().OnCollectIngredient();
         }
     }
 }

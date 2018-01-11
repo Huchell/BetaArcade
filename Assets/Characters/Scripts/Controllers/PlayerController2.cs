@@ -140,14 +140,56 @@ public class PlayerController2 : MonoBehaviour {
     [SerializeField]
     private float footstepCooldown = 0.25f;
     [SerializeField]
+    private float runningFootstepCooldown = 0.25f;
+
+    private bool groundedPrevFrame = false;
+
+    [Space(10)]
+    [Header("Sound Clips")]
+    [SerializeField]
     private AudioClip FootstepClip;
     [SerializeField]
     private AudioClip RunningFootstepClip;
     [SerializeField]
     private AudioClip JumpClip;
+    [SerializeField]
+    private AudioClip LandClip;
+    [SerializeField]
+    private AudioClip HiFiveClip;   //when does this happen? plug [PlayAudioClip(HiFiveClip);] into it
+    [SerializeField][Tooltip("Charge Jump for Rabbit, Charge for Cat")]
+    private AudioClip ChargeClip;
+    [SerializeField][Tooltip("Carrot Crunch for Rabbit, Yarn Thuds for Cat")]
+    private AudioClip EmoteClip;    //when does this happen? plug [PlayAudioClip(EmoteClip);] into it
+    [Space(10)]
+    [SerializeField]
+    private AudioClip CollectableClip;
+    [SerializeField]
+    private AudioClip IngredientClip;
+    [SerializeField]
+    private AudioClip LevitationClip;
+    
+    public void OnCollectCollectable()
+    {
+        PlayAudioClip(CollectableClip);
+    }
+    public void OnCollectIngredient()
+    {
+        PlayAudioClip(IngredientClip);
+    }
+    public void OnLevitatePotionStep()
+    {
+        PlayAudioClip(LevitationClip);
+    }
+    public void OnHighFive()
+    {
+        PlayAudioClip(HiFiveClip);
+    }
+    public void OnEmote()
+    {
+        PlayAudioClip(EmoteClip);
+    }
 
-    private bool groundedPrevFrame = false;
-
+    [Space(30)]
     public UnityEvent OnGround;
 
 	// Use this for initialization
@@ -323,7 +365,7 @@ public class PlayerController2 : MonoBehaviour {
     {
         ChargingUp = false;
         lockSpeed = false;
-
+        PlayAudioClip(LandClip);
         OnGround.Invoke();
     }
     #endregion
@@ -334,7 +376,7 @@ public class PlayerController2 : MonoBehaviour {
         // and make it so the player can move again
         ChargingUp = false;
         canMove = true;
-
+        PlayAudioClip(ChargeClip);
         OnChargedAction();
     }
     public virtual void StopCharge()
@@ -360,10 +402,10 @@ public class PlayerController2 : MonoBehaviour {
                 // play footsteps
                 if (audio)
                 {
-                    if (isWalking)
-                        PlayAudioClip(FootstepClip);
-                    else if (isSprinting)
-                        PlayAudioClip(RunningFootstepClip);
+                    if (isWalking && !playingWalkingSound)
+                        StartCoroutine("walkingSound");
+                    else if (isSprinting && !playingRunningSound)
+                        StartCoroutine("runningSound");
                 }
             }
 
@@ -378,6 +420,42 @@ public class PlayerController2 : MonoBehaviour {
                 animator.SetTrigger("FellOff");
         }
     }
+
+    bool playingWalkingSound = false;
+
+    IEnumerator walkingSound()
+    {
+        if (!playingWalkingSound)
+        {
+            playingWalkingSound = true;
+
+            while (isWalking)
+            {
+                PlayAudioClip(FootstepClip);
+                yield return new WaitForSecondsRealtime(footstepCooldown);
+            }
+        }
+        playingWalkingSound = false;
+    }
+
+
+    bool playingRunningSound = false;
+
+    IEnumerator runningSound()
+    {
+        if (!playingRunningSound)
+        {
+            playingRunningSound = true;
+
+            while (isSprinting)
+            {
+                PlayAudioClip(RunningFootstepClip);
+                yield return new WaitForSecondsRealtime(runningFootstepCooldown);
+            }
+        }
+        playingRunningSound = false;
+    }
+
 
     #region Util
     public string GetInputString(string input)

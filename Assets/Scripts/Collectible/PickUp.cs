@@ -9,16 +9,16 @@ public class PickUp : MonoBehaviour {
         transform.Rotate(new Vector3(15, 30, 45) * Time.deltaTime);
     }
 
+    public int value = 1;
+
     private void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Player"))
         {
-            // Do things
             gameObject.SetActive(false);
-
-            //other.gameObject.SetActive(false);
-            //count = count + 1;
-            //SetCountText();
+            
+            other.gameObject.GetComponent<PlayerController2>().OnCollectCollectable(); //usedForSound
+            PlayerManager.Instance.onButtonCollect(value);
         }
     }
 }
