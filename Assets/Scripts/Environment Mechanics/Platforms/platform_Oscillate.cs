@@ -36,12 +36,12 @@ public class platform_Oscillate : MonoBehaviour
         mf.mesh = null;
         startPosition.GetComponent<MeshRenderer>().enabled = false;
         endPosition.GetComponent<MeshRenderer>().enabled = false;
+        if (isActive) { StartCoroutine("OscillateUpdate"); }
     }
-
-    // Update is called once per frame
-    void Update()
+    
+    IEnumerator OscillateUpdate()
     {
-        if (isActive)
+        while (isActive)
         {
             timer += Time.deltaTime;
             float stdTime = timer * (speed / (Vector3.Distance(startPosition.transform.position, endPosition.transform.position)));
@@ -56,13 +56,14 @@ public class platform_Oscillate : MonoBehaviour
             Vector3 lerpPosition = new Vector3(lerpX, lerpY, lerpZ);
 
             platform.transform.position = lerpPosition;
-            //Debug.Log (lerpPosition);
+            yield return null;
         }
     }
 
     public void ToggleActivity()
     {
         isActive = !isActive;
+        if (isActive) { StartCoroutine("OscillateUpdate"); }
     }
 
     public void RefreshPlatforms()
