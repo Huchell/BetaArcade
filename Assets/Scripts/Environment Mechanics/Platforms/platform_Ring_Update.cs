@@ -37,10 +37,12 @@ public class platform_Ring_Update : MonoBehaviour
     {
         mf = GetComponent<MeshFilter>();
         mf.mesh = null;
+        if (isActive) { StartCoroutine("RingUpdate"); }
     }
 
     public void Update()
     {
+        /*
         if (isActive)
         {
             transform.RotateAround(transform.position, Vector3.up, 360f * RPS * Time.deltaTime);
@@ -60,48 +62,43 @@ public class platform_Ring_Update : MonoBehaviour
                 }
             }
         }
+        */
     }
+
+    IEnumerator RingUpdate()
+    {
+        while (isActive)
+        {
+            transform.RotateAround(transform.position, Vector3.up, 360f * RPS * Time.deltaTime);
+
+            worldTime += Time.deltaTime;
+
+            if (heightOffset != 0 && riseSpeed != 0)
+            {
+                for (int x = 0; x < platforms.Length; x++)
+                {
+                    float ratio = (float)x / (float)(platforms.Length);
+                    float timeMod = worldTime * riseSpeed / heightOffset;
+
+                    float yOffsetAmount = Mathf.Sin((timeMod + ratio) * 2 * Mathf.PI);
+
+                    platforms[x].gameObject.transform.position = new Vector3(platforms[x].transform.position.x, (transform.position.y) + (yOffsetAmount), platforms[x].transform.position.z);
+                }
+            }
+            yield return null;
+        }
+    }
+
 
     public void ToggleActivity()
     {
         isActive = !isActive;
+        if (isActive){ StartCoroutine("RingUpdate"); }
     }
 
     public void OnValidate()
     {
         numberOfPlatforms = Mathf.Clamp(numberOfPlatforms, 0, platformCountCap);
-
-        /*
-		if (Application.isPlaying)
-		{
-			update = false;
-			return;
-		}
-		if (platforms != null)
-		{
-			foreach (GameObject gm in platforms)
-			{
-				StartCoroutine (DestroyPlatforms(gm));
-			}
-		}
-		if (transform.childCount >= numberOfPlatforms)
-		{
-			return;
-		}
-		platforms = new GameObject[numberOfPlatforms];
-		for (int count = 0; count < numberOfPlatforms; count++)
-		{
-			Vector3 offset = Quaternion.AngleAxis ((360f / numberOfPlatforms) * count, Vector3.up) * new Vector3 (0, 0, radius);
-			GameObject gm = Instantiate (platformType);
-			//GameObject gm = new GameObject ("Sphere" + count);
-			//gm.AddComponent<SelectParent> ();
-			gm.transform.SetParent (transform, false);
-			gm.transform.localPosition += offset;
-			gm.transform.RotateAround (gm.transform.position, Vector3.up, (360f / numberOfPlatforms) * count);
-			gm.transform.localScale = platformScale;
-			gm.transform.parent = transform;
-			platforms [count] = gm;
-		}*/
     }
 
     IEnumerator DestroyPlatforms(GameObject platform)
@@ -114,7 +111,6 @@ public class platform_Ring_Update : MonoBehaviour
     {
         for (int x = transform.childCount - 1; x >= 0; x--)
         {
-            //StartCoroutine (DestroyPlatforms(transform.GetChild(x).gameObject));
             DestroyImmediate(transform.GetChild(x).gameObject);
         }
 
@@ -124,9 +120,6 @@ public class platform_Ring_Update : MonoBehaviour
         {
             Vector3 offset = Quaternion.AngleAxis((360f / numberOfPlatforms) * count, Vector3.up) * new Vector3(0, 0, radius);
             GameObject gm = Instantiate(platformType);
-            //GameObject gm = new GameObject ("Sphere" + count);
-
-            //gm.AddComponent<SelectParent> ();
             gm.transform.SetParent(transform, false);
             gm.transform.localPosition += offset;
             gm.transform.RotateAround(gm.transform.position, Vector3.up, (360f / numberOfPlatforms) * count);
