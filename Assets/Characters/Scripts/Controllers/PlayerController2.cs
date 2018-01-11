@@ -146,7 +146,7 @@ public class PlayerController2 : MonoBehaviour {
     public ParticleSystem FootstepParticles;
     private bool canFootstep = true;
     [SerializeField]
-    private float footstepCooldown = 0.25f;
+    private float footstepCooldown = 0.25f, runningFootstepCooldown = 0.25f;
 
     private bool groundedPrevFrame = false;
 
@@ -485,8 +485,6 @@ public class PlayerController2 : MonoBehaviour {
         playingRunningSound = false;
     }
 
-
->>>>>>> origin/Adam-Crunch
     #region Util
     public string GetInputString(string input)
     {
