@@ -17,7 +17,10 @@ public class Mover : MonoBehaviour
     private float transition;
     private bool isCompleted;
 
-    private void Update()
+    private int count = 0;
+    public float countDelay = 0;
+
+    private void FixedUpdate()
     {
         if (!rail)
         {
@@ -31,64 +34,68 @@ public class Mover : MonoBehaviour
 
     private void Play(bool forward = true)
     {
-        float m = (rail.nodes[currentSeg + 1].position - rail.nodes[currentSeg].position).magnitude;
-        float s = (Time.deltaTime * 1 / m) * speed;
-        transition += (forward) ? s : -s ;
-
-        if (transition > 1)
+        if (count > countDelay)
         {
-            transition = 0;
-            currentSeg++;
-            if (currentSeg == rail.nodes.Length - 1)
+            float m = (rail.nodes[currentSeg + 1].position - rail.nodes[currentSeg].position).magnitude;
+            float s = (Time.deltaTime * 1 / m) * speed;
+            transition += (forward) ? s : -s;
+
+            if (transition > 1)
             {
-                if(isLooping)
+                transition = 0;
+                currentSeg++;
+                if (currentSeg == rail.nodes.Length - 1)
                 {
-                    if(pingPong)
+                    if (isLooping)
                     {
-                        transition = 1;
-                        currentSeg = rail.nodes.Length - 2;
-                        isReversed = !isReversed;
+                        if (pingPong)
+                        {
+                            transition = 1;
+                            currentSeg = rail.nodes.Length - 2;
+                            isReversed = !isReversed;
+                        }
+                        else
+                        {
+                            currentSeg = 0;
+                        }
                     }
                     else
                     {
-                        currentSeg = 0;
+                        isCompleted = true;
+                        return;
                     }
                 }
-                else
-                {
-                    isCompleted = true;
-                    return;
-                }
             }
-        }
-        else if (transition < 0)
-        {
-            transition = 1;
-            currentSeg--;
-            if (currentSeg == - 1)
+            else if (transition < 0)
             {
-                if (isLooping)
+                transition = 1;
+                currentSeg--;
+                if (currentSeg == -1)
                 {
-                    if (pingPong)
+                    if (isLooping)
                     {
-                        transition = 0;
-                        currentSeg = 0;
-                        isReversed = !isReversed;
+                        if (pingPong)
+                        {
+                            transition = 0;
+                            currentSeg = 0;
+                            isReversed = !isReversed;
+                        }
+                        else
+                        {
+                            currentSeg = rail.nodes.Length - 2;
+                        }
                     }
                     else
                     {
-                        currentSeg = rail.nodes.Length - 2;
+                        isCompleted = true;
+                        return;
                     }
                 }
-                else
-                {
-                    isCompleted = true;
-                    return;
-                }
             }
-        }
 
-        transform.position = rail.PositionOnRail(currentSeg, transition, mode);
-        transform.rotation = rail.Orientation(currentSeg, transition);
+            transform.position = rail.PositionOnRail(currentSeg, transition, mode);
+            transform.rotation = rail.Orientation(currentSeg, transition);
+        }
+        count++;
     }
 }
