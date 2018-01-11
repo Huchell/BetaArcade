@@ -40,31 +40,6 @@ public class platform_Ring_Update : MonoBehaviour
         if (isActive) { StartCoroutine("RingUpdate"); }
     }
 
-    public void Update()
-    {
-        /*
-        if (isActive)
-        {
-            transform.RotateAround(transform.position, Vector3.up, 360f * RPS * Time.deltaTime);
-
-            worldTime += Time.deltaTime;
-
-            if (heightOffset != 0 && riseSpeed != 0)
-            {
-                for (int x = 0; x < platforms.Length; x++)
-                {
-                    float ratio = (float)x / (float)(platforms.Length);
-                    float timeMod = worldTime * riseSpeed / heightOffset;
-
-                    float yOffsetAmount = Mathf.Sin((timeMod + ratio) * 2 * Mathf.PI);
-
-                    platforms[x].gameObject.transform.position = new Vector3(platforms[x].transform.position.x, (transform.position.y) + (yOffsetAmount), platforms[x].transform.position.z);
-                }
-            }
-        }
-        */
-    }
-
     IEnumerator RingUpdate()
     {
         while (isActive)
