@@ -429,7 +429,7 @@ public class PlayerController2 : MonoBehaviour {
         {
             playingWalkingSound = true;
 
-            while (isWalking)
+            while (isWalking && controller.isGrounded)
             {
                 PlayAudioClip(FootstepClip);
                 yield return new WaitForSecondsRealtime(footstepCooldown);
@@ -447,7 +447,7 @@ public class PlayerController2 : MonoBehaviour {
         {
             playingRunningSound = true;
 
-            while (isSprinting)
+            while (isSprinting && controller.isGrounded)
             {
                 PlayAudioClip(RunningFootstepClip);
                 yield return new WaitForSecondsRealtime(runningFootstepCooldown);
