@@ -75,6 +75,14 @@ public class PlayerController2 : MonoBehaviour {
     public int playerNumber = 0;
     public bool playerActive = false;
 
+    public int playerHealth = 3;
+
+    float targetRot;
+	
+	public Vector3 windForce; //The ideal 'max force' of wind
+    public Vector3 currentWindForce; //The current wind force acting on the player
+    public bool inWindZone; //If the player is in a wind zone
+
     #region Components
     protected Transform cameraT;
     protected CharacterController controller;
@@ -139,8 +147,6 @@ public class PlayerController2 : MonoBehaviour {
     private bool canFootstep = true;
     [SerializeField]
     private float footstepCooldown = 0.25f;
-    [SerializeField]
-    private float runningFootstepCooldown = 0.25f;
 
     private bool groundedPrevFrame = false;
 
@@ -214,7 +220,7 @@ public class PlayerController2 : MonoBehaviour {
 
             if (direction != Vector2.zero) //stops 0/0 errors
             {
-                float targetRot = Mathf.Atan2(direction.x, direction.y) * GetRotationDamp() * Mathf.Rad2Deg + cameraT.eulerAngles.y;
+                targetRot = Mathf.Atan2(direction.x, direction.y) * GetRotationDamp() * Mathf.Rad2Deg + cameraT.eulerAngles.y;
                 transform.eulerAngles = Vector3.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetRot, ref turnSmoothVelocity, turnSmoothTime); //Character rotation
             }
         } else { currentSpeed = 0; }
@@ -314,6 +320,19 @@ public class PlayerController2 : MonoBehaviour {
         // Workout velocity
         Vector3 velocity = transform.forward * currentSpeed + Vector3.up * velocityY;
 
+		if (inWindZone)
+        {
+            if (windForce.normalized == Vector3.up)
+            {
+                velocityY = 0; //Stops the player from going crazy on vertical wind zones
+            }
+            if (currentWindForce.magnitude < windForce.magnitude) currentWindForce *= 1.1f; //Gradually reach ideal wind force
+        }
+        else
+        {
+            currentWindForce *= 0.9f; //Gradually reduce to zero when out of wind zero
+        }
+        velocity += currentWindForce; //Add wind force to velocity
         // Move the player
         controller.Move(velocity * Time.deltaTime);
         //currentSpeed = new Vector2(controller.velocity.x, controller.velocity.z).magnitude;
@@ -389,6 +408,17 @@ public class PlayerController2 : MonoBehaviour {
     protected virtual void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if (controller.collisionFlags == CollisionFlags.Above) { velocityY = 0; }
+
+        if(hit.collider.tag == "Damaging")
+        {
+            Vector3 dir = (-this.transform.forward).normalized;
+
+            Vector3 newpos = transform.position + dir * 30 * Time.deltaTime;
+            StartCoroutine( c_KnockbackCurve(hit.transform.position, newpos));
+            playerHealth -= 1;
+            
+            //Knockback
+        }
     }
 
     protected virtual void UpdateAnimations()
@@ -402,10 +432,10 @@ public class PlayerController2 : MonoBehaviour {
                 // play footsteps
                 if (audio)
                 {
-                    if (isWalking && !playingWalkingSound)
-                        StartCoroutine("walkingSound");
-                    else if (isSprinting && !playingRunningSound)
-                        StartCoroutine("runningSound");
+                    if (isWalking)
+                        PlayAudioClip(FootstepClip);
+                    else if (isSprinting)
+                        PlayAudioClip(RunningFootstepClip);
                 }
             }
 
@@ -420,42 +450,6 @@ public class PlayerController2 : MonoBehaviour {
                 animator.SetTrigger("FellOff");
         }
     }
-
-    bool playingWalkingSound = false;
-
-    IEnumerator walkingSound()
-    {
-        if (!playingWalkingSound)
-        {
-            playingWalkingSound = true;
-
-            while (isWalking)
-            {
-                PlayAudioClip(FootstepClip);
-                yield return new WaitForSecondsRealtime(footstepCooldown);
-            }
-        }
-        playingWalkingSound = false;
-    }
-
-
-    bool playingRunningSound = false;
-
-    IEnumerator runningSound()
-    {
-        if (!playingRunningSound)
-        {
-            playingRunningSound = true;
-
-            while (isSprinting)
-            {
-                PlayAudioClip(RunningFootstepClip);
-                yield return new WaitForSecondsRealtime(runningFootstepCooldown);
-            }
-        }
-        playingRunningSound = false;
-    }
-
 
     #region Util
     public string GetInputString(string input)
@@ -492,4 +486,22 @@ public class PlayerController2 : MonoBehaviour {
     }
     #endregion
     #endregion
+
+
+
+    IEnumerator c_KnockbackCurve(Vector3 direction, Vector3 newpos)
+    {
+        
+       
+        float t = 0;
+
+
+        while (t < 1)
+ {
+            yield return null;
+            t += Time.deltaTime;
+            transform.position = new Vector3(Mathf.Lerp(transform.position.x, newpos.x, Time.deltaTime), transform.position.y, Mathf.Lerp(transform.position.z, newpos.z, Time.deltaTime));
+            
+        }
+    }
 }
