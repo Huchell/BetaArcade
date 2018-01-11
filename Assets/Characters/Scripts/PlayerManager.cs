@@ -118,4 +118,19 @@ public class PlayerManager : MonoBehaviour {
             controller.CameraSettings.CameraReference.enabled = true;
         }
     }
+
+    public int teamButtons;
+    //public for UI access
+
+    public void onButtonCollect(int Denom)
+    {
+        teamButtons += Denom;
+        if (teamButtons >= 100)
+        {
+            teamButtons -= 100;
+            //GainOneLife();
+        }
+        Debug.Log(teamButtons.ToString());
+        //update UI variable for button count to be = teamButtons.ToString();
+    }
 }
