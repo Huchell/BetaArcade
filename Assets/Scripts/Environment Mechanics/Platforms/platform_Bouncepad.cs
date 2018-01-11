@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Obsolete]
 public class platform_Bouncepad : MonoBehaviour {
 
 	[Tooltip("Force of bouncepad. 5.0 is equivalent to a standard player jump.")]

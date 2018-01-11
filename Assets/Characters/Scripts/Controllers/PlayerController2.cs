@@ -336,6 +336,7 @@ public class PlayerController2 : MonoBehaviour {
         canMove = true;
 
         OnChargedAction();
+        animator.SetTrigger("ChargeRelease");
     }
     public virtual void StopCharge()
     {
