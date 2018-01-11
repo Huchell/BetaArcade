@@ -451,6 +451,42 @@ public class PlayerController2 : MonoBehaviour {
         }
     }
 
+    bool playingWalkingSound = false;
+
+    IEnumerator walkingSound()
+    {
+        if (!playingWalkingSound)
+        {
+            playingWalkingSound = true;
+
+            while (isWalking && controller.isGrounded)
+            {
+                PlayAudioClip(FootstepClip);
+                yield return new WaitForSecondsRealtime(footstepCooldown);
+            }
+        }
+        playingWalkingSound = false;
+    }
+
+    bool playingRunningSound = false;
+
+    IEnumerator runningSound()
+    {
+        if (!playingRunningSound)
+        {
+            playingRunningSound = true;
+
+            while (isSprinting && controller.isGrounded)
+            {
+                PlayAudioClip(RunningFootstepClip);
+                yield return new WaitForSecondsRealtime(runningFootstepCooldown);
+            }
+        }
+        playingRunningSound = false;
+    }
+
+
+>>>>>>> origin/Adam-Crunch
     #region Util
     public string GetInputString(string input)
     {
