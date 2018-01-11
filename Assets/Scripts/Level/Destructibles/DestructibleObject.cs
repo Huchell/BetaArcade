@@ -76,10 +76,13 @@ public class DestructibleObject : MonoBehaviour {
         {
             Transform child = transform.GetChild(i);
 
-            if (child && 
-                child != DestructibleMesh.transform && 
-                child != NormalMesh.transform)
-                transform.GetChild(i).SetParent(transform.parent, true);
+            if (DestructibleMesh)
+            {
+                if (child &&
+                    child != DestructibleMesh.transform &&
+                    child != NormalMesh.transform)
+                    transform.GetChild(i).SetParent(transform.parent, true);
+            }
         }
     }
 }

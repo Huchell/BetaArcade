@@ -397,6 +397,7 @@ public class PlayerController2 : MonoBehaviour {
         canMove = true;
         PlayAudioClip(ChargeClip);
         OnChargedAction();
+        animator.SetTrigger("ChargeRelease");
     }
     public virtual void StopCharge()
     {
