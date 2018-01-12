@@ -26,6 +26,10 @@ public class PotionMixing : MonoBehaviour {
         if (PlayerController2.ingredient3)
         {
             Debug.Log("Ingredient 3 Done");
+            PlayerController2.ingredient1 = false;
+            PlayerController2.ingredient2 = false;
+            PlayerController2.ingredient3 = false;
+            PlayerController2.ingredientCounter = 0;
             OnPotionFinished.Invoke();
         }
 

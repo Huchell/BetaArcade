@@ -114,91 +114,9 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events: []
-      transformMask:
-      - path: 
-        weight: 1
-      - path: Bip001
-        weight: 1
-      - path: Bip001/Bip001 Pelvis
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 L Thigh
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 L Thigh/Bip001 L Calf
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 L Thigh/Bip001 L Calf/Bip001
-          L Foot
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 L Thigh/Bip001 L Calf/Bip001
-          L Foot/Bip001 L Toe0
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 L Thigh/Bip001 L Calf/Bip001
-          L Foot/Bip001 L Toe0/Bip001 L Toe01
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 L Thigh/Bip001 L Calf/Bip001
-          L Foot/Bip001 L Toe0/Bip001 L Toe01/Bip001 L Toe02
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 R Thigh
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 R Thigh/Bip001 R Calf
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 R Thigh/Bip001 R Calf/Bip001
-          R Foot
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 R Thigh/Bip001 R Calf/Bip001
-          R Foot/Bip001 R Toe0
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 R Thigh/Bip001 R Calf/Bip001
-          R Foot/Bip001 R Toe0/Bip001 R Toe01
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 R Thigh/Bip001 R Calf/Bip001
-          R Foot/Bip001 R Toe0/Bip001 R Toe01/Bip001 R Toe02
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2/Bip001
-          Neck
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2/Bip001
-          Neck/Bip001 Head
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2/Bip001
-          Neck/Bip001 L Clavicle
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2/Bip001
-          Neck/Bip001 L Clavicle/Bip001 L UpperArm
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2/Bip001
-          Neck/Bip001 L Clavicle/Bip001 L UpperArm/Bip001 L Forearm
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2/Bip001
-          Neck/Bip001 L Clavicle/Bip001 L UpperArm/Bip001 L Forearm/Bip001 L Hand
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2/Bip001
-          Neck/Bip001 L Clavicle/Bip001 L UpperArm/Bip001 L Forearm/Bip001 L Hand/Bip001
-          L Finger0
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2/Bip001
-          Neck/Bip001 R Clavicle
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2/Bip001
-          Neck/Bip001 R Clavicle/Bip001 R UpperArm
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2/Bip001
-          Neck/Bip001 R Clavicle/Bip001 R UpperArm/Bip001 R Forearm
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2/Bip001
-          Neck/Bip001 R Clavicle/Bip001 R UpperArm/Bip001 R Forearm/Bip001 R Hand
-        weight: 1
-      - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Spine1/Bip001 Spine2/Bip001
-          Neck/Bip001 R Clavicle/Bip001 R UpperArm/Bip001 R Forearm/Bip001 R Hand/Bip001
-          R Finger0
-        weight: 1
-      maskType: 3
-      maskSource: {instanceID: 0}
+      transformMask: []
+      maskType: 1
+      maskSource: {fileID: 31900000, guid: f71b0aaf7d0c3844881e5aea249a5788, type: 2}
       additiveReferencePoseFrame: 0
     isReadable: 1
   meshes:

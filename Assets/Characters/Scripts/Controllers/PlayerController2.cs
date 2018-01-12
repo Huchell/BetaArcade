@@ -149,6 +149,7 @@ public class PlayerController2 : MonoBehaviour {
     private float footstepCooldown = 0.25f, runningFootstepCooldown = 0.25f;
 
     private bool groundedPrevFrame = false;
+    private Vector3 startScale;
 
     [Space(10)]
     [Header("Sound Clips")]
@@ -205,6 +206,8 @@ public class PlayerController2 : MonoBehaviour {
         animator = GetComponent<Animator>();
         audio = GetComponent<AudioSource>();
 
+
+        startScale = transform.localScale;
         groundedPrevFrame = controller.isGrounded;
     }
 
@@ -256,6 +259,13 @@ public class PlayerController2 : MonoBehaviour {
         MovePlayer();
         CheckGrounded();
         UpdateAnimations();
+
+        if (transform.parent && !controller.isGrounded)
+        {
+            transform.parent = null;
+            transform.localScale = startScale;
+            transform.localRotation = Quaternion.identity;
+        }
 
         // Set groundedPrevFrame to isGrounded at the end of 
         // everything to get ready for the next frame
@@ -409,6 +419,14 @@ public class PlayerController2 : MonoBehaviour {
     protected virtual void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if (controller.collisionFlags == CollisionFlags.Above) { velocityY = 0; }
+        if (controller.collisionFlags == CollisionFlags.Below) {
+            if (!groundedPrevFrame)
+                if (hit.gameObject.GetComponent<Rigidbody>())
+                {
+                    Debug.Log("FORCE!");
+                    hit.gameObject.GetComponent<Rigidbody>().AddForce(Vector3.down * 5, ForceMode.Impulse);
+                }
+        }
 
         if(hit.collider.tag == "Damaging")
         {
@@ -419,6 +437,11 @@ public class PlayerController2 : MonoBehaviour {
             playerHealth -= 1;
             
             //Knockback
+        }
+
+        if (hit.collider.tag == "Attach")
+        {
+            transform.SetParent(hit.transform, true);
         }
     }
 
@@ -506,6 +529,18 @@ public class PlayerController2 : MonoBehaviour {
         playerNumber = index;
         playerActive = playerNumber > 0;
         CameraSettings.CameraReference.SetActive(playerActive);
+    }
+    public int TakeDamage(int amount)
+    {
+        playerHealth -= 1;
+
+        if (playerHealth <= 0)
+        {
+            //Die
+
+        }
+
+        return playerHealth;
     }
 
     protected void PlayAudioClip(AudioClip clip, bool wait = false)

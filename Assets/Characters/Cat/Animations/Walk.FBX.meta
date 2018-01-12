@@ -124,7 +124,7 @@ ModelImporter:
       keepOriginalPositionXZ: 0
       heightFromFeet: 0
       mirror: 0
-      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      bodyMask: 01000000010000000100000001000000010000000100000001000000000000000000000000000000000000000000000000000000
       curves: []
       events: []
       transformMask:
@@ -215,19 +215,19 @@ ModelImporter:
           R Finger0/Bip001 R Finger01/Bip001 R Finger02
         weight: 1
       - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Tail
-        weight: 0
+        weight: 1
       - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Tail/Bip001 Tail1
-        weight: 0
+        weight: 1
       - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Tail/Bip001 Tail1/Bip001 Tail2
-        weight: 0
+        weight: 1
       - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Tail/Bip001 Tail1/Bip001 Tail2/Bip001
           Tail3
-        weight: 0
+        weight: 1
       - path: Bip001/Bip001 Pelvis/Bip001 Spine/Bip001 Tail/Bip001 Tail1/Bip001 Tail2/Bip001
           Tail3/Bip001 Tail4
-        weight: 0
-      maskType: 3
-      maskSource: {instanceID: 0}
+        weight: 1
+      maskType: 0
+      maskSource: {fileID: 31900000, guid: f71b0aaf7d0c3844881e5aea249a5788, type: 2}
       additiveReferencePoseFrame: 0
     isReadable: 1
   meshes:

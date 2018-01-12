@@ -1,8 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class IngredientPickup : MonoBehaviour {
+
+    [SerializeField]
+    private UnityEvent OnPickup;
 
     private void Update()
     {
@@ -20,6 +24,7 @@ public class IngredientPickup : MonoBehaviour {
             //Debug.Log(other.gameObject.GetComponent<PlayerController2>().ingredientCounter);
 
             other.gameObject.GetComponent<PlayerController2>().OnCollectIngredient();
+            OnPickup.Invoke();
         }
     }
 }

@@ -35,7 +35,6 @@ public class LevelTriggerBehaviour : MonoBehaviour {
                 try
                 {
                     CatController cat = (CatController)controller;
-
                     catIn = true;
                 }
                 catch
@@ -99,9 +98,6 @@ public class LevelTriggerBehaviour : MonoBehaviour {
 
     private void Trigger(LevelTrigger e, Collider other)
     {
-        if (catNeeded == catIn && rabbitNeeded == rabbitIn)
-        {
-            e.Invoke(other);
-        }
+        e.Invoke(other);
     }
 }

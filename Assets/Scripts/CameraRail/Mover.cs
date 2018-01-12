@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 //using UnityEditor;
 
 public class Mover : MonoBehaviour
@@ -19,6 +20,10 @@ public class Mover : MonoBehaviour
 
     private int count = 0;
     public float countDelay = 0;
+
+    // Added by Sean
+    [SerializeField]
+    private UnityEvent OnCompleted;
 
     private void FixedUpdate()
     {
@@ -62,6 +67,7 @@ public class Mover : MonoBehaviour
                     else
                     {
                         isCompleted = true;
+                        OnCompleted.Invoke();
                         return;
                     }
                 }
@@ -88,6 +94,7 @@ public class Mover : MonoBehaviour
                     else
                     {
                         isCompleted = true;
+                        OnCompleted.Invoke();
                         return;
                     }
                 }

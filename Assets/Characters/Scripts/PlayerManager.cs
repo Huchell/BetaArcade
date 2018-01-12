@@ -104,7 +104,7 @@ public class PlayerManager : MonoBehaviour {
             controller.canJump = false;
             controller.canCharge = false;
 
-            controller.CameraSettings.CameraReference.enabled = false;
+            controller.CameraSettings.CameraReference.gameObject.SetActive(false);
         }
     }
     public void StartAllPlayers()
@@ -115,7 +115,7 @@ public class PlayerManager : MonoBehaviour {
             controller.canJump = true;
             controller.canCharge = true;
 
-            controller.CameraSettings.CameraReference.enabled = true;
+            controller.CameraSettings.CameraReference.gameObject.SetActive(true);
         }
     }
 
