@@ -43,6 +43,9 @@ public class KnifeBoss : MonoBehaviour
     public int rabbitHealth = 3;
     public int knifeHealth = 3;
 
+    public GameObject ingredient;
+    public UnityEngine.Events.UnityEvent OnBossKilled;
+
     // Use this for initialization
     void Start()
     {
@@ -217,6 +220,7 @@ public class KnifeBoss : MonoBehaviour
                 }
                 else
                 {
+                    OnBossKilled.Invoke();
                     DestroyObject(gameObject);
                     //Debug.Log("Player Won Game");
                 }
